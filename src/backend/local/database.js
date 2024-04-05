@@ -1,4 +1,4 @@
-import { time } from 'console'
+import { encrypt, decrypt, deriveKey, verifyMasterKey } from '../utils/encryption'
 
 const sqlite3 = require('sqlite3').verbose()
 const path = require('path')
@@ -49,7 +49,15 @@ function initializeDatabase() {
 //add a user to the database
 
 async function addUser(userName, firstName = null, lastName = null, masterKey) {
-  const hashedMasterKey = masterKey
+  console.log('default master key: ', masterKey)
+  const {hashedMasterKey, salt} = await deriveKey(masterKey)
+  console.log("This is the hashed key: ", hashedMasterKey)
+  const verify = verifyMasterKey(masterKey, salt, hashedMasterKey)
+  if(verify){
+    console.log('success')
+  }else{
+    console.log('failed')
+  }
   let timestamp = new Date()
   timestamp = timestamp.toISOString()
   return new Promise((resolve, reject) => {
