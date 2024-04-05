@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import ErrorModal from '@renderer/modals/ErrorModal'
+import SuccessModal from '@renderer/modals/SuccessModal'
 
 const RegisterPage = (): JSX.Element => {
   const navigate = useNavigate()
@@ -8,28 +10,31 @@ const RegisterPage = (): JSX.Element => {
   const [masterKey, setMasterKey] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-
+  const [message, setMessage] = useState('')
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   // Handle form input changes
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-const { name, value } = e.target
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = e.target
     switch (name) {
-    case 'userName':
+      case 'userName':
         setUserName(value)
         break
-    case 'masterKey':
+      case 'masterKey':
         setMasterKey(value)
         break
-    case 'firstName':
+      case 'firstName':
         setFirstName(value)
         break
-    case 'lastName':
+      case 'lastName':
         setLastName(value)
         break
-    default:
+      default:
         break
     }
-}
+  }
+
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -39,55 +44,87 @@ const { name, value } = e.target
       .invoke('register-account', { userName, masterKey, firstName, lastName })
       .then((response) => {
         if (response.success) {
-          console.log('bimbachi')
-          navigate('/')
+          setMessage('User registration success')
+          setShowSuccessModal(true)
         } else {
-          console.log('simbachi');
+          setMessage(response.message)
+          setShowErrorModal(true)
         }
       })
       .catch((error) => {
         console.log('Error sending registration request', error)
+        setMessage("Error while registering the account")
+        setShowErrorModal(true)
       })
   }
 
+  const generateMasterKey = ():void =>{
+    window.electron.ipcRenderer.invoke('generate-password')
+    .then((response)=>{
+      setMasterKey(response)
+    })
+    .catch((err)=>{
+      console.log("Error", err)
+    })
+  }
+
+  const closeModal = (): void => {
+    setShowErrorModal(false)
+    setMessage('')
+  }
+
+  const closeSuccessModal = (): void => {
+    setShowSuccessModal(false)
+    setMessage('')
+    navigate("/dashboard")
+  }
+
   return (
-    <div className="flex items-center justify-center h-screen bg-zinc-700">
-      <div className="p-10 bg-gray-900 rounded-lg shadow-xl">
-        <div className="flex justify-center mb-6 text-xl font-semibold text-white">👁️Spy</div>
+    <div className="flex items-center justify-center h-screen bg-zinc-950">
+      <div className="p-10 bg-zinc-900 rounded-lg shadow-xl w-96">
+        <div className="flex justify-center mb-6 text-5xl font-bold text-slate-400">👁️Spy</div>
         <form onSubmit={handleSubmit}>
-          {' '}
-          <div className="mb-6">
-            <label htmlFor="userName" className="block text-white text-sm font-bold mb-2">
-            username
+          <div className="mb-4">
+            <label htmlFor="username" className="block text-white text-sm font-bold mb-2">
+              Username
             </label>
             <input
-            name="userName"
-            type="text"
-            id="userName"
-            value={userName}
-            onChange={handleInputChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
-              master key
-            </label>
-            <input
-              name="masterKey" // Corrected to include name attribute
-              type="password"
-              id="masterKey"
-              value={masterKey}
+              name="userName"
+              type="text"
+              id="userName"
+              value={userName}
               onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
-          <div className="mb-6">
-            <label htmlFor="firstName" className="block text-white text-sm font-bold mb-2">
-              first name
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
+              Master Key
+            </label>
+            <div className="flex">
+              <input
+                name="masterKey"
+                type="text"
+                id="masterKey"
+                value={masterKey}
+                onChange={handleInputChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+              <button
+                type="button"
+                onClick={generateMasterKey}
+                className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Generate
+              </button>
+            </div>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
+              First name
             </label>
             <input
-              name="firstName" // Corrected to include name attribute
+              name="firstName"
               type="text"
               id="firstName"
               value={firstName}
@@ -95,12 +132,12 @@ const { name, value } = e.target
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
-          <div className="mb-6">
-            <label htmlFor="lastName" className="block text-white text-sm font-bold mb-2">
-              last name
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
+              Last Name
             </label>
             <input
-              name="lastName" // Corrected to include name attribute
+              name="lastName"
               type="text"
               id="lastName"
               value={lastName}
@@ -108,27 +145,26 @@ const { name, value } = e.target
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
-          <p className="inline-block align-baseline font-bold  text-red-500">
-            First time user?
-            <span className=" hover:text-red-800">
-              <Link
-                to="/"
-                className="inline-block align-baseline font-bold text-sm text-red-500 hover:text-red-800"
-              >
-                Create an account
+          <div className="text-center mb-4">
+            <p className="text-xs text-red-500">
+              Already have an account?{' '}
+              <Link to="/" className="hover:text-red-800">
+                Login
               </Link>
-            </span>
-          </p>
-          <div className="flex items-center justify-between">
+            </p>
+          </div>
+          <div className="flex justify-center">
             <button
-              type="submit" // Corrected to use type="submit" for form submission
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="submit"
+              className="bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             >
-              Log In
+              Register
             </button>
           </div>
         </form>
       </div>
+      {showErrorModal && (<ErrorModal errorMessage={message} onClose={closeModal} />)}
+      {showSuccessModal && (<SuccessModal successMessage={message} onClose={closeSuccessModal} />)}
     </div>
   )
 }

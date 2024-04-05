@@ -6,7 +6,7 @@ def generate_ascii_tree(directory, indent=''):
     items.sort()
     
     for i, item in enumerate(items):
-        if(item == 'node_modules'):
+        if(item == 'node_modules' or item==".git"):
             tree += f'{indent}{"└──" if is_last else "├──"}{item}/\n'
             continue
         path = os.path.join(directory, item)

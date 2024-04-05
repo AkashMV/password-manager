@@ -43,11 +43,10 @@ const LoginPage = (): JSX.Element => {
       }
     })
   }
-
   return (
-    <div className="flex items-center justify-center h-screen bg-zinc-700">
-      <div className="p-10 bg-gray-900 rounded-lg shadow-xl">
-        <div className="flex justify-center mb-6 text-xl font-semibold text-white">👁️Spy</div>
+    <div className="flex items-center justify-center h-screen bg-zinc-950">
+      <div className="p-10 bg-zinc-900 rounded-lg shadow-xl">
+        <div className="flex justify-center mb-6 text-5xl font-bold text-slate-400">👁️Spy</div>
         <form onSubmit={handleSubmit}>
           {' '}
           <div className="mb-4">
@@ -55,12 +54,12 @@ const LoginPage = (): JSX.Element => {
               Username
             </label>
             <input
-              name="username" // Corrected to include name attribute
+              name="username"
               type="text"
               id="username"
               value={name}
               onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
           <div className="mb-6">
@@ -68,7 +67,7 @@ const LoginPage = (): JSX.Element => {
               Master Key
             </label>
             <input
-              name="masterKey" // Corrected to include name attribute
+              name="masterKey"
               type="password"
               id="masterKey"
               value={masterKey}
@@ -76,21 +75,18 @@ const LoginPage = (): JSX.Element => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
-          <p className="inline-block align-baseline font-bold  text-red-500">
-            First time user?
-            <span className=" hover:text-red-800">
-              <Link
-                to="/register"
-                className="inline-block align-baseline font-bold text-sm text-red-500 hover:text-red-800"
-              >
+          <div className="text-center mb-6">
+            <p className="text-xs text-red-500">
+              First time user? {' '}
+              <Link to="/register" className="hover:text-red-800">
                 Create an account
               </Link>
-            </span>
-          </p>
-          <div className="flex items-center justify-between">
+            </p>
+          </div>
+          <div className="flex justify-center">
             <button
-              type="submit" // Corrected to use type="submit" for form submission
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="submit"
+              className="bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             >
               Log In
             </button>

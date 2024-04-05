@@ -2,7 +2,8 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { addUser } from '../backend/local/database'
+import { addUser, getAllUsers } from '../backend/local/database'
+import generatePassword from "../backend/utils/passwordGenerator"
 
 function createWindow(): void {
   // Create the browser window.
@@ -50,22 +51,39 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
+  // IPC handlers
 
   ipcMain.handle('register-account', (event, args) => {
     return new Promise((resolve) => {
       const { userName, masterKey, firstName, lastName } = args
-
+      console.log(userName, masterKey, firstName, lastName)
       addUser(userName, masterKey, firstName, lastName)
         .then((userId) => {
           resolve({ success: true, userId: userId, message: 'Account registration success' })
+          getAllUsers().then((rows)=>{console.log(rows)}).catch((err)=>{console.log(err)})
         })
         .catch((error) => {
+          if(error.message == "Username already exists"){
+            resolve({success:false, message: "username already exists"})
+          }else{
           console.error('Registration error:', error)
           resolve({ success: false, message: 'Failed to register account.' })
+          }
         })
     })
   })
+
+  ipcMain.handle('generate-password', ()=>{
+    return new Promise((resolve, reject)=>{
+      const generatedPassword = generatePassword()
+      if(generatePassword){
+        resolve(generatedPassword)
+      }else{
+        reject("Password generation error")
+      }
+    })
+  })
+
 
   createWindow()
 
