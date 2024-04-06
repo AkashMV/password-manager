@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ErrorModal from '@renderer/modals/ErrorModal'
 import SuccessModal from '@renderer/modals/SuccessModal'
+import validator from 'validator'
 
 const RegisterPage = (): JSX.Element => {
   const navigate = useNavigate()
@@ -40,22 +41,50 @@ const RegisterPage = (): JSX.Element => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault() // Prevent default form submission
 
-    window.electron.ipcRenderer
-      .invoke('register-account', { userName, masterKey, firstName, lastName })
-      .then((response) => {
-        if (response.success) {
-          setMessage('User registration success')
-          setShowSuccessModal(true)
-        } else {
-          setMessage(response.message)
+    let validationErrors = 3
+
+    if(userName.length < 4){
+      setMessage("The master key must be atleast 4 characters long")
+      setShowErrorModal(true)
+    }else{
+      validationErrors--
+    }
+    if(masterKey.length < 8){
+      setMessage("The master key must be atleast 8 characters long")
+      setShowErrorModal(true)
+    }else{
+      validationErrors--
+    }
+
+    
+
+    if(!validator.isAlphanumeric(userName)){
+      setMessage("Username must not contain special characters")
+      setShowErrorModal(true)
+    }else{
+      validationErrors--
+    }
+    
+
+    console.log(validationErrors)
+    if(validationErrors == 0){
+      window.electron.ipcRenderer
+        .invoke('register-account', { userName, masterKey, firstName, lastName })
+        .then((response) => {
+          if (response.success) {
+            setMessage('User registration success')
+            setShowSuccessModal(true)
+          } else {
+            setMessage(response.message)
+            setShowErrorModal(true)
+          }
+        })
+        .catch((error) => {
+          console.log('Error sending registration request', error)
+          setMessage("Error while registering the account")
           setShowErrorModal(true)
-        }
-      })
-      .catch((error) => {
-        console.log('Error sending registration request', error)
-        setMessage("Error while registering the account")
-        setShowErrorModal(true)
-      })
+        })
+      }
   }
 
   const generateMasterKey = ():void =>{
@@ -121,7 +150,7 @@ const RegisterPage = (): JSX.Element => {
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
-              First name
+              First name<span>(optional)</span>
             </label>
             <input
               name="firstName"
@@ -134,7 +163,7 @@ const RegisterPage = (): JSX.Element => {
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
-              Last Name
+              Last Name <span>(optional)</span>
             </label>
             <input
               name="lastName"

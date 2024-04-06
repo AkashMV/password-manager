@@ -2,6 +2,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
+
 const DashBoard = (): JSX.Element => {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -17,7 +18,7 @@ const DashBoard = (): JSX.Element => {
             <p className="mb-4">Manage and view your locally stored passwords.</p>
             <Link
               to="/local-passwords"
-              className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="inline-block bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded"
             >
               View Local Passwords
             </Link>
@@ -27,7 +28,7 @@ const DashBoard = (): JSX.Element => {
             <p className="mb-4">Access and manage your passwords stored in the cloud.</p>
             <Link
               to="/cloud-passwords"
-              className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="inline-block bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded"
             >
               View Cloud Passwords
             </Link>
@@ -37,7 +38,7 @@ const DashBoard = (): JSX.Element => {
             <p className="mb-4">Check if any of your accounts have been compromised in a data breach.</p>
             <Link
               to="/breach-report"
-              className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="inline-block bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded"
             >
               Get Breach Report
             </Link>
@@ -47,7 +48,7 @@ const DashBoard = (): JSX.Element => {
             <p className="mb-4">Customize and manage your account settings.</p>
             <Link
               to="/settings"
-              className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="inline-block bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded"
             >
               Go to Settings
             </Link>
