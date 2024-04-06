@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { addUser, getAllUsers } from '../backend/local/database'
+import { addUser, verifyUser } from '../backend/local/database'
 import generatePassword from "../backend/utils/passwordGenerator"
 
 function createWindow(): void {
@@ -58,17 +58,16 @@ app.whenReady().then(() => {
       const { userName, masterKey, firstName, lastName } = args
       console.log(userName, masterKey, firstName, lastName)
       addUser(userName, masterKey, firstName, lastName)
-        .then((userId) => {
-          resolve({ success: true, userId: userId, message: 'Account registration success' })
-          getAllUsers().then((rows)=>{console.log(rows)}).catch((err)=>{console.log(err)})
+        .then((response) => {
+          if(response.success){
+            resolve({ success: true, message: 'Account registration success' })
+          }else{
+            resolve({ success: false, message: response.message })
+          }
         })
         .catch((error) => {
-          if(error.message == "Username already exists"){
-            resolve({success:false, message: "username already exists"})
-          }else{
           console.error('Registration error:', error)
-          resolve({ success: false, message: 'Failed to register account.' })
-          }
+          resolve({ success: false, message: 'Internal Server Error.' })
         })
     })
   })
@@ -81,6 +80,30 @@ app.whenReady().then(() => {
       }else{
         reject("Password generation error")
       }
+    })
+  })
+
+  ipcMain.handle('login-user', (event, args) => {
+    return new Promise((resolve) => {
+      const { userName, masterKey } = args
+      if(!userName || userName.length < 1){
+        resolve({success:false, message:"no username provided"})
+      }
+      if(!masterKey || masterKey.length < 1){
+        resolve({success:false, message:"no master key provided"})
+      }
+      verifyUser(userName, masterKey)
+        .then((response)=>{
+          if(response.success){
+            resolve({success:true, message: "user authentication success"})
+          }else{
+            resolve({success:false, message:"user authentication failed"})
+          }
+        })
+        .catch((err)=>{
+          console.log("Login error: ", err)
+          resolve({success:false, message:"internal server error"})
+        })
     })
   })
 

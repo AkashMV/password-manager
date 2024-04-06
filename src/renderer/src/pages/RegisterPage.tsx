@@ -105,7 +105,7 @@ const RegisterPage = (): JSX.Element => {
   const closeSuccessModal = (): void => {
     setShowSuccessModal(false)
     setMessage('')
-    navigate("/dashboard")
+    navigate("/")
   }
 
   return (
@@ -127,7 +127,7 @@ const RegisterPage = (): JSX.Element => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
+            <label htmlFor="masterKey" className="block text-white text-sm font-bold mb-2">
               Master Key
             </label>
             <div className="flex">
@@ -149,7 +149,7 @@ const RegisterPage = (): JSX.Element => {
             </div>
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
+            <label htmlFor="fullName" className="block text-white text-sm font-bold mb-2">
               First name<span>(optional)</span>
             </label>
             <input

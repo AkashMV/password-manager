@@ -1,17 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import ErrorModal from '@renderer/modals/ErrorModal'
 
 const LoginPage = (): JSX.Element => {
-  const [name, setName] = useState<string>('')
+  const navigate = useNavigate()
+  const [userName, setName] = useState<string>('')
   const [masterKey, setMasterKey] = useState<string>('')
+  const [message, setMessage] = useState<string>('')
+  const [showErrorModal, setShowErrorModal] = useState(false)
 
-  useEffect(() => {
-    // Set focus on the username input field after the component mounts
-    const usernameInput = document.getElementById('userName');
-    if (usernameInput) {
-      usernameInput.focus();
-    }
-  }, []);
 
   // Handle form input changes with TypeScript type for the event
   const handleInputChange = (e): void => {
@@ -31,18 +28,47 @@ const LoginPage = (): JSX.Element => {
   // Handle form submission with TypeScript type for the event
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault() // Correctly prevent the default form submission
-    // Send login data to the Electron backend
-    window.electron.ipcRenderer.send('--testing', { name, masterKey }) // Corrected IPC channel name
-    // Listen for login response
-    window.electron.ipcRenderer.once('login-user-response', (event, success) => {
-      if (success) {
-        console.log('ds')
-        // Redirect to dashboard as needed
-      } else {
-        console.log('momos');
-      }
-    })
-  }
+    
+    let validationErrors = 2
+    if(userName.length < 1){
+      setMessage("Username must not be blank")
+      setShowErrorModal(true)
+    }else{
+      validationErrors--
+    }
+    if(masterKey.length < 1){
+      setMessage("Master Key must not be blank")
+      setShowErrorModal(true)
+    }else{
+      validationErrors--
+    }
+    
+    // Send login data to the Electron backend if there are no errors
+      if(validationErrors == 0){
+        window.electron.ipcRenderer
+          .invoke('login-user', { userName, masterKey })
+            .then((response) => {
+              if (response.success) {
+                console.log("success")
+                navigate("/dashboard")
+              } else {
+                setMessage(response.message)
+                setShowErrorModal(true)
+              }
+            })
+            .catch((error) => {
+              console.log('Error sending Login request', error)
+              setMessage("An error occured while log in")
+              setShowErrorModal(true)
+            })
+        }
+    }
+
+    const closeModal = (): void => {
+      setShowErrorModal(false)
+      setMessage('')
+    }
+
   return (
     <div className="flex items-center justify-center h-screen bg-zinc-950">
       <div className="p-10 bg-zinc-900 rounded-lg shadow-xl">
@@ -57,7 +83,7 @@ const LoginPage = (): JSX.Element => {
               name="username"
               type="text"
               id="username"
-              value={name}
+              value={userName}
               onChange={handleInputChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline"
             />
@@ -93,6 +119,7 @@ const LoginPage = (): JSX.Element => {
           </div>
         </form>
       </div>
+      {showErrorModal && (<ErrorModal errorMessage={message} onClose={closeModal} />)}
     </div>
   )
 }

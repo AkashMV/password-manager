@@ -70,7 +70,7 @@ async function addUser(userName, masterKey, firstName = null, lastName = null) {
         reject(err)
       }else{
         if(row.count > 0){
-          reject(new Error('Username already exists'))
+          resolve({success:false, message:"username already exists"})
         }else{
           const query = `
           INSERT INTO users (username, master_key, salt, first_name, last_name, created_at, updated_at)
@@ -83,7 +83,8 @@ async function addUser(userName, masterKey, firstName = null, lastName = null) {
               if (err) {
                 reject(err)
               } else {
-                resolve(this.lastID)
+                resolve({success:true, message:"user registration success"})
+                console.log(this)
               }
             }
           )
@@ -112,6 +113,39 @@ function getAllUsers(){
   })
 }
 
+// verify the username with associated masterkey
+function verifyUser(user, masterKey){
+  const userName = user
+  const userMasterKey = masterKey
+
+
+
+  return new Promise((resolve, reject) =>{
+    const validationQuery =  `SELECT * FROM users WHERE username = ?`
+    db.get(validationQuery, userName, (err, row)=>{
+      if(err){
+        reject(err)
+      }else{
+        if(row){
+          const storedKey = row.master_key
+          const storedSalt = row.salt
+
+          const userVerified = verifyMasterKey(userMasterKey, storedSalt, storedKey)
+          if(userVerified){
+            resolve({success:true, message: "user login success", user:row})
+          }else{
+            resolve({success:false, message: "Incorrect username or password"})
+          }
+        }else{
+          resolve({success:false, message:"incorrect username or password"})
+        }
+      }
+    })
+  })
+  
+
+}
+
 // PASSWORD RELATED OPERATIONS
 
-export { addUser, getAllUsers }
+export { addUser, getAllUsers, verifyUser }
