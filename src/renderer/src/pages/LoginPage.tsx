@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ErrorModal from '@renderer/modals/ErrorModal'
+import { AuthContext } from '@renderer/utils/AuthContext'
 
 const LoginPage = (): JSX.Element => {
   const navigate = useNavigate()
@@ -8,8 +9,9 @@ const LoginPage = (): JSX.Element => {
   const [masterKey, setMasterKey] = useState<string>('')
   const [message, setMessage] = useState<string>('')
   const [showErrorModal, setShowErrorModal] = useState(false)
+  const {user, setUser} = useContext(AuthContext)
 
-
+console.log(user)
   // Handle form input changes with TypeScript type for the event
   const handleInputChange = (e): void => {
     const { name, value } = e.target
@@ -49,7 +51,11 @@ const LoginPage = (): JSX.Element => {
           .invoke('login-user', { userName, masterKey })
             .then((response) => {
               if (response.success) {
-                console.log("success")
+                const userData = {
+                  id: response.user.id,
+                  username: response.user.username
+                }
+                setUser(userData)
                 navigate("/dashboard")
               } else {
                 setMessage(response.message)

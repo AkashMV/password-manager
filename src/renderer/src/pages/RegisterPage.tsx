@@ -9,8 +9,6 @@ const RegisterPage = (): JSX.Element => {
   // State for form fields
   const [userName, setUserName] = useState('')
   const [masterKey, setMasterKey] = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [message, setMessage] = useState('')
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
@@ -25,12 +23,6 @@ const RegisterPage = (): JSX.Element => {
       case 'masterKey':
         setMasterKey(value)
         break
-      case 'firstName':
-        setFirstName(value)
-        break
-      case 'lastName':
-        setLastName(value)
-        break
       default:
         break
     }
@@ -40,36 +32,35 @@ const RegisterPage = (): JSX.Element => {
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault() // Prevent default form submission
-
+    console.log(userName.length)
     let validationErrors = 3
 
-    if(userName.length < 4){
-      setMessage("The master key must be atleast 4 characters long")
+    if(userName.length < 4 || !userName){
+      setMessage("The Username must be at least 4 characters long")
       setShowErrorModal(true)
+      return
     }else{
       validationErrors--
     }
     if(masterKey.length < 8){
-      setMessage("The master key must be atleast 8 characters long")
+      setMessage("The master key must be at least 8 characters long")
       setShowErrorModal(true)
+      return
     }else{
       validationErrors--
     }
-
-    
-
     if(!validator.isAlphanumeric(userName)){
       setMessage("Username must not contain special characters")
       setShowErrorModal(true)
+      return
     }else{
       validationErrors--
     }
-    
 
-    console.log(validationErrors)
+
     if(validationErrors == 0){
       window.electron.ipcRenderer
-        .invoke('register-account', { userName, masterKey, firstName, lastName })
+        .invoke('register-account', { userName, masterKey })
         .then((response) => {
           if (response.success) {
             setMessage('User registration success')
@@ -147,32 +138,6 @@ const RegisterPage = (): JSX.Element => {
                 Generate
               </button>
             </div>
-          </div>
-          <div className="mb-4">
-            <label htmlFor="fullName" className="block text-white text-sm font-bold mb-2">
-              First name<span>(optional)</span>
-            </label>
-            <input
-              name="firstName"
-              type="text"
-              id="firstName"
-              value={firstName}
-              onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-white text-sm font-bold mb-2">
-              Last Name <span>(optional)</span>
-            </label>
-            <input
-              name="lastName"
-              type="text"
-              id="lastName"
-              value={lastName}
-              onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            />
           </div>
           <div className="text-center mb-4">
             <p className="text-xs text-red-500">

@@ -27,8 +27,6 @@ function initializeDatabase() {
         username TEXT NOT NULL UNIQUE,
         master_key TEXT NOT NULL,
         salt TEXT NOT NULL,
-        first_name TEXT,
-        last_name TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )`
@@ -54,13 +52,13 @@ function initializeDatabase() {
 
 
 //add a user to the database
-async function addUser(userName, masterKey, firstName = null, lastName = null) {
+async function addUser(userName, masterKey) {
   console.log('default master key: ', masterKey)
   const {hashedMasterKey, salt} = await deriveKey(masterKey)
   console.log("This is the hashed key: ", hashedMasterKey)
   let timestamp = new Date()
   timestamp = timestamp.toISOString()
-  console.log([userName, hashedMasterKey, firstName, lastName, timestamp, timestamp, salt])
+  console.log([userName, hashedMasterKey, timestamp, timestamp, salt])
 
 
   return new Promise((resolve, reject) => {
@@ -73,12 +71,12 @@ async function addUser(userName, masterKey, firstName = null, lastName = null) {
           resolve({success:false, message:"username already exists"})
         }else{
           const query = `
-          INSERT INTO users (username, master_key, salt, first_name, last_name, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO users (username, master_key, salt, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?)
           `
           db.run(
             query,
-            [userName, hashedMasterKey, salt, firstName, lastName, timestamp, timestamp],
+            [userName, hashedMasterKey, salt, timestamp, timestamp],
             function (err) {
               if (err) {
                 reject(err)
@@ -98,6 +96,7 @@ async function addUser(userName, masterKey, firstName = null, lastName = null) {
 
 // update user information from the database(username, firstname, lastname)
 
+
 // get all users from the database
 
 function getAllUsers(){
@@ -113,7 +112,7 @@ function getAllUsers(){
   })
 }
 
-// verify the username with associated masterkey
+// verify the user with associated masterkey
 function verifyUser(user, masterKey){
   const userName = user
   const userMasterKey = masterKey

@@ -1,20 +1,26 @@
 // DashBoard.tsx
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FiLogOut } from 'react-icons/fi'
+import { AuthContext } from '@renderer/utils/AuthContext'
 
 const DashBoard = (): JSX.Element => {
   const navigate = useNavigate()
+  const {user, setUser} = useContext(AuthContext)
+
+  console.log(user)
   const handleLogout = ():void => {
     // Perform any necessary logout actions (e.g., clearing user session)
+    setUser(null)
     navigate('/')
+
   }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <header className="bg-zinc-900 py-4">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold">Welcome, User</h1>
+          <h1 className="text-2xl font-bold">Welcome, {user?.username}</h1>
           <button
             onClick={handleLogout}
             className="flex items-center text-white hover:text-lime-300"

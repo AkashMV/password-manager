@@ -51,63 +51,6 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC handlers
-
-  ipcMain.handle('register-account', (event, args) => {
-    return new Promise((resolve) => {
-      const { userName, masterKey, firstName, lastName } = args
-      console.log(userName, masterKey, firstName, lastName)
-      addUser(userName, masterKey, firstName, lastName)
-        .then((response) => {
-          if(response.success){
-            resolve({ success: true, message: 'Account registration success' })
-          }else{
-            resolve({ success: false, message: response.message })
-          }
-        })
-        .catch((error) => {
-          console.error('Registration error:', error)
-          resolve({ success: false, message: 'Internal Server Error.' })
-        })
-    })
-  })
-
-  ipcMain.handle('generate-password', ()=>{
-    return new Promise((resolve, reject)=>{
-      const generatedPassword = generatePassword()
-      if(generatePassword){
-        resolve(generatedPassword)
-      }else{
-        reject("Password generation error")
-      }
-    })
-  })
-
-  ipcMain.handle('login-user', (event, args) => {
-    return new Promise((resolve) => {
-      const { userName, masterKey } = args
-      if(!userName || userName.length < 1){
-        resolve({success:false, message:"no username provided"})
-      }
-      if(!masterKey || masterKey.length < 1){
-        resolve({success:false, message:"no master key provided"})
-      }
-      verifyUser(userName, masterKey)
-        .then((response)=>{
-          if(response.success){
-            resolve({success:true, message: "user authentication success"})
-          }else{
-            resolve({success:false, message:"user authentication failed"})
-          }
-        })
-        .catch((err)=>{
-          console.log("Login error: ", err)
-          resolve({success:false, message:"internal server error"})
-        })
-    })
-  })
-
-
   createWindow()
 
   app.on('activate', function () {
@@ -128,3 +71,60 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+// IPC handlers
+
+
+ipcMain.handle('register-account', (event, args) => {
+  return new Promise((resolve) => {
+    const { userName, masterKey } = args
+    console.log(userName, masterKey)
+    addUser(userName, masterKey)
+      .then((response) => {
+        if(response.success){
+          resolve({ success: true, message: 'Account registration success' })
+        }else{
+          resolve({ success: false, message: response.message })
+        }
+      })
+      .catch((error) => {
+        console.error('Registration error:', error)
+        resolve({ success: false, message: 'Internal Server Error.' })
+      })
+  })
+})
+
+ipcMain.handle('generate-password', ()=>{
+  return new Promise((resolve, reject)=>{
+    const generatedPassword = generatePassword()
+    if(generatePassword){
+      resolve(generatedPassword)
+    }else{
+      reject("Password generation error")
+    }
+  })
+})
+
+ipcMain.handle('login-user', (event, args) => {
+  return new Promise((resolve) => {
+    const { userName, masterKey } = args
+    if(!userName || userName.length < 1){
+      resolve({success:false, message:"no username provided"})
+    }
+    if(!masterKey || masterKey.length < 1){
+      resolve({success:false, message:"no master key provided"})
+    }
+    verifyUser(userName, masterKey)
+      .then((response)=>{
+        if(response.success){
+          resolve({success:true, message: "user authentication success", user: {id: response.user.id, username: response.user.username}})
+        }else{
+          resolve({success:false, message:response.message})
+        }
+      })
+      .catch((err)=>{
+        console.log("Login error: ", err)
+        resolve({success:false, message:"internal server error"})
+      })
+  })
+})
