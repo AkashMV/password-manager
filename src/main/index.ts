@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { addUser, verifyUser } from '../backend/local/database'
+import { addUser, verifyUser, getPasswordsByUser } from '../backend/local/database'
 import generatePassword from "../backend/utils/passwordGenerator"
 
 function createWindow(): void {
@@ -125,6 +125,22 @@ ipcMain.handle('login-user', (event, args) => {
       .catch((err)=>{
         console.log("Login error: ", err)
         resolve({success:false, message:"internal server error"})
+      })
+  })
+})
+
+
+ipcMain.handle('fetch-passwords', (event, args)=>{
+  const {userId} = args
+  return new Promise((resolve)=>{
+    getPasswordsByUser(userId)
+      .then((passwords)=>{
+        console.log(passwords)
+        resolve({success:true, message:"Passwords fetched successfully", passwords: passwords.passwords})
+      })
+      .catch((err)=>{
+        console.log("Password fetch error", err)
+        resolve({success:false, message:"Internal Server Error"})
       })
   })
 })

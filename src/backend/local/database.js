@@ -1,3 +1,4 @@
+import { type } from 'os'
 import { encrypt, decrypt, deriveKey, verifyMasterKey } from '../utils/encryption'
 
 const sqlite3 = require('sqlite3').verbose()
@@ -147,4 +148,23 @@ function verifyUser(user, masterKey){
 
 // PASSWORD RELATED OPERATIONS
 
-export { addUser, getAllUsers, verifyUser }
+
+function getPasswordsByUser(userId){
+  const user = userId
+  return new Promise((resolve, reject)=>{
+    const fetchQuery = `SELECT * FROM passwords WHERE user_id = ?`
+    db.all(fetchQuery, user, (err, rows)=>{
+      if(err){
+        reject(err)
+      }else{
+       if(rows){
+        resolve({success:true, passwords:rows})
+       }else{
+        reject(new Error("Fetch Error"))
+       }
+      }
+    })
+  })
+}
+
+export { addUser, getAllUsers, verifyUser, getPasswordsByUser }

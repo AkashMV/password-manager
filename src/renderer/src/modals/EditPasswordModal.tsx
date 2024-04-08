@@ -1,22 +1,27 @@
-// PasswordModal.tsx
 import React, { useState } from 'react'
 
-interface PasswordModalProps {
-  onClose: () => void
-  onSubmit: (password: Password) => void
+interface Password {
+  id: number
+  service: string
+  username: string
+  password: string
 }
 
-const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element => {
-  const [service, setService] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+interface PasswordModalProps {
+  userPassword: Password
+  onClose: () => void
+}
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+const EditPasswordModal = ({ userPassword, onClose }: PasswordModalProps): JSX.Element => {
+  const [service, setService] = useState(userPassword.service)
+  const [username, setUsername] = useState(userPassword.username)
+  const [password, setPassword] = useState(userPassword.password)
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>):void => {
     e.preventDefault()
-    onSubmit({ id: 0, service, username, password })
   }
 
-  const generatePassword = () => {
+  const generatePassword = ():void => {
     // Generate a random password
     const generatedPassword = Math.random().toString(36).slice(-8)
     setPassword(generatedPassword)
@@ -25,8 +30,8 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="absolute inset-0 bg-black opacity-50"></div>
-      <div className="bg-white rounded-lg p-6 z-10">
-        <h2 className="text-xl font-bold mb-4">Add Password</h2>
+      <div className="bg-zinc-800 rounded-lg p-6 z-10 text-white">
+        <h2 className="text-xl font-bold mb-4">View/Edit Password</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="service" className="block mb-2">
@@ -37,7 +42,7 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
               id="service"
               value={service}
               onChange={(e) => setService(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded text-black"
               required
             />
           </div>
@@ -50,7 +55,7 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded  text-black"
               required
             />
           </div>
@@ -64,7 +69,7 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 border rounded  text-black"
                 required
               />
               <button
@@ -84,7 +89,7 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
             >
               Cancel
             </button>
-            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
+            <button type="submit" className="px-4 py-2 bg-lime-300 hover:bg-lime-500 text-black rounded">
               Save
             </button>
           </div>
@@ -94,4 +99,4 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
   )
 }
 
-export default PasswordModal
+export default EditPasswordModal
