@@ -66,6 +66,8 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
     })
     .catch((err)=>{
       console.log("Error", err)
+      setMessage("Error Generating Password")
+      setShowErrorModal(true)
     })
   }
 

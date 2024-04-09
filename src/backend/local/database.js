@@ -194,10 +194,42 @@ function updatePasswordById(password){
   })
 }
 
+ function createPasswordByUserId(password) {
+  const userId = password.id
+  const service = password.service
+  const userName = password.username
+  const passwordData = password.password
+  let timestamp = new Date()
+  timestamp = timestamp.toISOString()
+  console.log(userId, service, passwordData, timestamp)
+
+  return new Promise((resolve, reject) => {
+    if(!userId || !passwordData){
+      reject(new Error("Incomplete Data"))
+    }else{
+      const query = `
+      INSERT INTO passwords (user_id, service, user_name, password)
+      VALUES (?, ?, ?, ?)
+      `
+      db.run(query, [userId, service, userName, passwordData],
+        function(err){
+          if(err){
+            reject(err)
+          }else{
+            resolve({success:true, message:"password created successfully"})
+          }
+        }
+      )
+    }
+  })
+}
+
+
 export { 
   addUser, 
   getAllUsers, 
   verifyUser, 
   getPasswordsByUser, 
-  updatePasswordById
+  updatePasswordById,
+  createPasswordByUserId,
 }

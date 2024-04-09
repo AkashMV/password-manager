@@ -6,7 +6,8 @@ import {
   addUser, 
   verifyUser, 
   getPasswordsByUser,
-  updatePasswordById
+  updatePasswordById,
+  createPasswordByUserId
 } from '../backend/local/database'
 import generatePassword from "../backend/utils/passwordGenerator"
 
@@ -150,6 +151,25 @@ ipcMain.handle('fetch-passwords', (event, args)=>{
   })
 })
 
+ipcMain.handle('create-password', (event, args)=>{
+  const {passwordObject} = args
+  const password = passwordObject
+  console.log(password)
+  return new Promise((resolve)=>{
+    if(!password){
+      resolve({success:false, message:"Password details not provided"})
+    }else{
+      createPasswordByUserId(password)
+        .then((message)=>{
+          resolve({success:true, message:message}) 
+        })
+        .catch((error)=>{
+          console.log("Password Update Error", error)
+          resolve({success:false, message:"Internal Server Error"})
+        })
+    }
+  })
+})
 
 ipcMain.handle('update-password', (event, args)=>{
   const {passwordObject} = args

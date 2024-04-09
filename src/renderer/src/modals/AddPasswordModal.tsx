@@ -1,47 +1,89 @@
 // PasswordModal.tsx
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
+import ErrorModal from './ErrorModal'
+import { AuthContext } from '@renderer/utils/AuthContext'
+import SuccessModal from '@renderer/modals/SuccessModal';
 
-interface Password {
-  id: number
-  service: string
-  username: string
-  password: string
-}
 
 interface PasswordModalProps {
   onClose: () => void
-  onSaved: () => void
-  initalPassword: Password | null
+  refreshPasswords: () => void
 }
 
-const addPasswordModal = ({ onClose, onSaved }: PasswordModalProps): JSX.Element => {
+const AddPasswordModal = ({ onClose, refreshPasswords }: PasswordModalProps): JSX.Element => {
+  const { user } = useContext(AuthContext)
+  const userId = user?.id
   const [service, setService] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [message, setMessage] = useState("")
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
 
+  const closeSuccessModal = ():void => {
+    setShowSuccessModal(false)
+    refreshPasswords()
+    onClose()
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>):void => {
+
+
     e.preventDefault()
-    onSaved()
+    if(password.length < 1){
+      setMessage("Password must not be empty")
+      setShowErrorModal(true)
+      return
+    }else if(service.length < 1){
+      setMessage("Service must not be empty")
+      setShowErrorModal(true)
+      return
+    }else if(username.length < 1){
+      setMessage("username must not be empty")
+      setShowErrorModal(true)
+      return
+    }else{
+      const passwordObject = {
+        id:userId,
+        service:service,
+        username: username,
+        password: password
+      }
+      window.electron.ipcRenderer.invoke("create-password", {passwordObject})
+        .then((response)=>{
+          if(response.success){
+            setMessage("Password created successfully")
+            setShowSuccessModal(true)
+          }else{
+            setMessage(response.message)
+            setShowErrorModal(true)
+          }
+        })
+    }
+  }
+  
+
+
+
+
+  const generatePassword = ():void =>{
+    window.electron.ipcRenderer.invoke('generate-password')
+    .then((response)=>{
+      setPassword(response)
+    })
+    .catch((err)=>{
+      console.log("Error", err)
+      setMessage("Error Generating Password")
+      setShowErrorModal(true)
+    })
   }
 
-
-  const editPassword = ():void=>{
-    console.log("helo")
+  const closeErrorModal = ():void =>{
+    setMessage("")
+    setShowErrorModal(false)
   }
 
-  const generatePassword = ():void => {
-    // Generate a random password
-
-    window.electron.ipcRenderer.invoke("generate-password")
-      .then((response)=>{
-        setPassword(response)
-      })
-      .catch((err)=>{
-        console.log("password generation error", err)
-      })
-  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -81,7 +123,7 @@ const addPasswordModal = ({ onClose, onSaved }: PasswordModalProps): JSX.Element
             </label>
             <div className="flex">
               <input
-                type="password"
+                type="text"
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -105,14 +147,16 @@ const addPasswordModal = ({ onClose, onSaved }: PasswordModalProps): JSX.Element
             >
               Cancel
             </button>
-            <button type="submit" className="px-4 py-2 bg-lime-300 hover:bg-lime-500 text-black rounded" onClick={editPassword}>
-              Save
+            <button type="submit" className="px-4 py-2 bg-lime-300 hover:bg-lime-500 text-black rounded">
+              Add
             </button>
           </div>
         </form>
       </div>
+      {showErrorModal && (<ErrorModal errorMessage={message} onClose={closeErrorModal} />)}
+      {showSuccessModal && (<SuccessModal successMessage={message} onClose={closeSuccessModal} />)}
     </div>
   )
 }
 
-export default addPasswordModal
+export default AddPasswordModal

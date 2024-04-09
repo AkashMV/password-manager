@@ -5,7 +5,7 @@ import { FiArrowLeft } from 'react-icons/fi'
 import PasswordComponent from '@renderer/components/PasswordComponent'
 import { AuthContext } from '@renderer/utils/AuthContext'
 import ErrorModal from '@renderer/modals/ErrorModal'
-import addPasswordModal from '@renderer/modals/AddPasswordModal'
+import AddPasswordModal from '@renderer/modals/AddPasswordModal'
 
 interface Password {
   id: number
@@ -48,8 +48,12 @@ const LocalStorage = (): JSX.Element => {
   }
 
 
-  const openModal = ():void =>{
+  const openShowPasswordModal = ():void =>{
     setShowAddPasswwordModal(true)
+  }
+
+  const closeAddPasswordModal = ():void => {
+    setShowAddPasswwordModal(false)
   }
 
   return (
@@ -77,13 +81,13 @@ const LocalStorage = (): JSX.Element => {
           ))}
           <div
             className="bg-zinc-800 p-6 rounded-lg shadow-md flex items-center justify-center cursor-pointer"
-            onClick={openModal}
+            onClick={openShowPasswordModal}
           >
             <span className="text-4xl">+</span>
           </div> 
         </div>
       </main>
-      {showAddPasswordModal && (<addPasswordModal errorMessage={message} onClose={closeErrorModal} />)}
+      {showAddPasswordModal && (<AddPasswordModal onClose={closeAddPasswordModal} refreshPasswords={fetchPasswords}/>)}
       {showErrorModal && (<ErrorModal errorMessage={message} onClose={closeErrorModal} />)}
     </div>
   )
