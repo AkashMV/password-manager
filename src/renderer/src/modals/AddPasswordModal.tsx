@@ -10,11 +10,11 @@ interface Password {
 
 interface PasswordModalProps {
   onClose: () => void
-  onSubmit: (password: Password, create:false) => void
+  onSaved: () => void
   initalPassword: Password | null
 }
 
-const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element => {
+const addPasswordModal = ({ onClose, onSaved }: PasswordModalProps): JSX.Element => {
   const [service, setService] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -23,7 +23,12 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>):void => {
     e.preventDefault()
-    onSubmit({ id: 0, service, username, password })
+    onSaved()
+  }
+
+
+  const editPassword = ():void=>{
+    console.log("helo")
   }
 
   const generatePassword = ():void => {
@@ -100,7 +105,7 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
             >
               Cancel
             </button>
-            <button type="submit" className="px-4 py-2 bg-lime-300 hover:bg-lime-500 text-black rounded">
+            <button type="submit" className="px-4 py-2 bg-lime-300 hover:bg-lime-500 text-black rounded" onClick={editPassword}>
               Save
             </button>
           </div>
@@ -110,4 +115,4 @@ const PasswordModal = ({ onClose, onSubmit }: PasswordModalProps): JSX.Element =
   )
 }
 
-export default PasswordModal
+export default addPasswordModal

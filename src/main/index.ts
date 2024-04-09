@@ -2,7 +2,12 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { addUser, verifyUser, getPasswordsByUser } from '../backend/local/database'
+import { 
+  addUser, 
+  verifyUser, 
+  getPasswordsByUser,
+  updatePasswordById
+} from '../backend/local/database'
 import generatePassword from "../backend/utils/passwordGenerator"
 
 function createWindow(): void {
@@ -105,7 +110,7 @@ ipcMain.handle('generate-password', ()=>{
   })
 })
 
-ipcMain.handle('login-user', (event, args) => {
+ipcMain.handle('verify-user', (event, args) => {
   return new Promise((resolve) => {
     const { userName, masterKey } = args
     if(!userName || userName.length < 1){
@@ -142,5 +147,26 @@ ipcMain.handle('fetch-passwords', (event, args)=>{
         console.log("Password fetch error", err)
         resolve({success:false, message:"Internal Server Error"})
       })
+  })
+})
+
+
+ipcMain.handle('update-password', (event, args)=>{
+  const {passwordObject} = args
+  const password = passwordObject
+  console.log(password)
+  return new Promise((resolve)=>{
+    if(!password){
+      resolve({success:false, message:"Password details not provided"})
+    }else{
+      updatePasswordById(password)
+        .then((message)=>{
+          resolve({success:true, message:message}) 
+        })
+        .catch((error)=>{
+          console.log("Password Update Error", error)
+          resolve({success:false, message:"Internal Server Error"})
+        })
+    }
   })
 })

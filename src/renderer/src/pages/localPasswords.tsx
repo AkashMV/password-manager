@@ -1,16 +1,16 @@
 // LocalStorage.tsx
 import React, { useState, useEffect, useContext } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { FiArrowLeft } from 'react-icons/fi'
 import PasswordComponent from '@renderer/components/PasswordComponent'
-import PasswordModal from '@renderer/modals/EditPasswordModal'
 import { AuthContext } from '@renderer/utils/AuthContext'
 import ErrorModal from '@renderer/modals/ErrorModal'
+import addPasswordModal from '@renderer/modals/AddPasswordModal'
 
 interface Password {
   id: number
   service: string
-  username: string
+  user_name: string
   password: string
 }
 
@@ -19,9 +19,9 @@ const LocalStorage = (): JSX.Element => {
   const { user } = useContext(AuthContext)
   const userId = user?.id
   const [passwords, setPasswords] = useState<Password[]>([])
-  const [showModal, setShowModal] = useState(false)
   const [message, setMessage] = useState<string>('')
   const [showErrorModal, setShowErrorModal] = useState(false)
+  const [showAddPasswordModal, setShowAddPasswwordModal] = useState(false)
 
   // Fetch passwords from the database on component mount
   useEffect(() => {
@@ -43,38 +43,13 @@ const LocalStorage = (): JSX.Element => {
       })
   }
 
-  const openModal = (): void => {
-    setShowModal(true)
-  }
-
-  const closeModal = (): void => {
-    setShowModal(false)
-  }
-
   const closeErrorModal = (): void => {
     setShowErrorModal(false)
   }
 
-  const addPassword = (newPassword: Password): void => {
-    // Make an IPC call to add the new password to the database
-    window.electron.ipcRenderer.invoke('add-password', newPassword).then(() => {
-      fetchPasswords() // Refresh the passwords after adding a new one
-      closeModal()
-    })
-  }
 
-  const deletePassword = (passwordId: number): void => {
-    // Make an IPC call to delete the password from the database
-    window.electron.ipcRenderer.invoke('delete-password', passwordId).then(() => {
-      fetchPasswords() // Refresh the passwords after deleting one
-    })
-  }
-
-  const updatePassword = (updatedPassword: Password): void => {
-    // Make an IPC call to update the password in the database
-    window.electron.ipcRenderer.invoke('update-password', updatedPassword).then(() => {
-      fetchPasswords() // Refresh the passwords after updating one
-    })
+  const openModal = ():void =>{
+    setShowAddPasswwordModal(true)
   }
 
   return (
@@ -97,6 +72,7 @@ const LocalStorage = (): JSX.Element => {
             <PasswordComponent
               key={password.id}
               password={password}
+              refreshPasswords = {fetchPasswords}
             />
           ))}
           <div
@@ -104,10 +80,10 @@ const LocalStorage = (): JSX.Element => {
             onClick={openModal}
           >
             <span className="text-4xl">+</span>
-          </div>
+          </div> 
         </div>
       </main>
-      {showModal && <PasswordModal onClose={closeModal} onSubmit={addPassword} />}
+      {showAddPasswordModal && (<addPasswordModal errorMessage={message} onClose={closeErrorModal} />)}
       {showErrorModal && (<ErrorModal errorMessage={message} onClose={closeErrorModal} />)}
     </div>
   )

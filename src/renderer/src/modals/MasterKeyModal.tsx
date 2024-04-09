@@ -1,18 +1,43 @@
+import {useContext, useState} from 'react'
+import { AuthContext } from '@renderer/utils/AuthContext'
+
 interface MasterKeyModalProps {
   onClose: () => void
-  onVerified: () => void
+  onDeclined: () => void
+  handleView: () => void
+  handleEdit: () => void
+  operation: string
 }
 
-const MasterKeyModal = ({ onClose, onVerified }: MasterKeyModalProps): JSX.Element => {
+const MasterKeyModal = ({ onClose, onDeclined, handleView, handleEdit, operation }: MasterKeyModalProps): JSX.Element => {
   const [masterKey, setMasterKey] = useState('')
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const {user} = useContext(AuthContext)
+  const userName = user?.username
+  
+  
+  
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>):void => {
     e.preventDefault()
-    // Perform master key verification logic here
-    // If the master key is valid, call onVerified()
-    // If the master key is invalid, display an error message
-    onVerified()
+
+    window.electron.ipcRenderer
+      .invoke('verify-user', { userName, masterKey })
+      .then((response)=>{
+        if(response.success){
+          if(operation == "view"){
+            handleView()
+          }else{
+            handleEdit()
+          }
+        }else{
+          onDeclined()
+        }
+      })
+      .catch((err)=>{
+        console.log(err)
+        onDeclined()
+      })
   }
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">

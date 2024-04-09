@@ -48,7 +48,7 @@ console.log(user)
     // Send login data to the Electron backend if there are no errors
       if(validationErrors == 0){
         window.electron.ipcRenderer
-          .invoke('login-user', { userName, masterKey })
+          .invoke('verify-user', { userName, masterKey })
             .then((response) => {
               if (response.success) {
                 const userData = {

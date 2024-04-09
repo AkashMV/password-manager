@@ -1,30 +1,72 @@
 import React, { useState } from 'react'
+import ErrorModal from './ErrorModal'
 
 interface Password {
   id: number
   service: string
-  username: string
+  user_name: string
   password: string
 }
 
 interface PasswordModalProps {
   userPassword: Password
   onClose: () => void
+  onUpdateSuccess: () => void
 }
 
-const EditPasswordModal = ({ userPassword, onClose }: PasswordModalProps): JSX.Element => {
+const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordModalProps): JSX.Element => {
   const [service, setService] = useState(userPassword.service)
-  const [username, setUsername] = useState(userPassword.username)
+  const [username, setUsername] = useState(userPassword.user_name)
   const [password, setPassword] = useState(userPassword.password)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [message, setMessage] = useState("")
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>):void => {
     e.preventDefault()
+    if(password.length < 1){
+      setMessage("Password must not be empty")
+      setShowErrorModal(true)
+      return
+    }else if(service.length < 1){
+      setMessage("Service must not be empty")
+      setShowErrorModal(true)
+      return
+    }else if(username.length < 1){
+      setMessage("username must not be empty")
+      setShowErrorModal(true)
+      return
+    }else{
+      const passwordObject = {
+        id:userPassword.id,
+        service:service,
+        username: username,
+        password: password
+      }
+      window.electron.ipcRenderer.invoke("update-password", {passwordObject})
+        .then((response)=>{
+          if(response.success){
+            onUpdateSuccess()
+          }else{
+            setMessage(response.message)
+            setShowErrorModal(true)
+          }
+        })
+    }
+  }
+  
+
+  const closeErrorModal = ():void =>{
+    setShowErrorModal(false)
   }
 
-  const generatePassword = ():void => {
-    // Generate a random password
-    const generatedPassword = Math.random().toString(36).slice(-8)
-    setPassword(generatedPassword)
+  const generatePassword = ():void =>{
+    window.electron.ipcRenderer.invoke('generate-password')
+    .then((response)=>{
+      setPassword(response)
+    })
+    .catch((err)=>{
+      console.log("Error", err)
+    })
   }
 
   return (
@@ -65,7 +107,7 @@ const EditPasswordModal = ({ userPassword, onClose }: PasswordModalProps): JSX.E
             </label>
             <div className="flex">
               <input
-                type="password"
+                type="text"
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -95,6 +137,7 @@ const EditPasswordModal = ({ userPassword, onClose }: PasswordModalProps): JSX.E
           </div>
         </form>
       </div>
+      {showErrorModal && (<ErrorModal errorMessage={message} onClose={closeErrorModal} />)}
     </div>
   )
 }

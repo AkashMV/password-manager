@@ -1,4 +1,3 @@
-import { type } from 'os'
 import { encrypt, decrypt, deriveKey, verifyMasterKey } from '../utils/encryption'
 
 const sqlite3 = require('sqlite3').verbose()
@@ -167,4 +166,38 @@ function getPasswordsByUser(userId){
   })
 }
 
-export { addUser, getAllUsers, verifyUser, getPasswordsByUser }
+function updatePasswordById(password){
+  const pId = password.id
+  const userName = password.username
+  const service = password.service
+  const passwordData = password.password
+  return new Promise((resolve, reject)=>{
+    if(!pId){
+      reject(new Error("No Id provided"))
+    }else{
+      const query = `
+        UPDATE passwords
+        SET service = ?,
+            user_name = ?,
+            password = ?
+          WHERE id = ?
+        `
+        db.run(query, [service, userName, passwordData, pId],
+        function(err){
+          if(err){
+            reject(err)
+          }else{
+            resolve({success:true, message:"password updated successfully"})
+          }
+        })
+    }
+  })
+}
+
+export { 
+  addUser, 
+  getAllUsers, 
+  verifyUser, 
+  getPasswordsByUser, 
+  updatePasswordById
+}
