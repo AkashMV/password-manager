@@ -4,4 +4,4 @@ out
 .DS_Store
 *.log*
 .env
-src/backend/local/localPasswords.db
+./src/backend/local/localPasswords.db
