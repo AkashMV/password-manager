@@ -191,7 +191,6 @@ ipcMain.handle('create-password', (event, args)=>{
 ipcMain.handle('update-password', (event, args)=>{
   const {passwordObject} = args
   const password = passwordObject
-  console.log(password)
   return new Promise((resolve)=>{
     if(!password){
       resolve({success:false, message:"Password details not provided"})
@@ -242,7 +241,7 @@ ipcMain.handle('update-cloud-integration', (event, args) => {
   const { userId, cloudEnabled } = args;
   console.log(userId, cloudEnabled);
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!userId) {
       resolve({ success: false, message: "User Not Logged In" });
     } else {
@@ -287,7 +286,7 @@ ipcMain.handle('update-cloud-integration', (event, args) => {
 ipcMain.handle("login-cloud", (event, args) => {
   const { cloudId } = args;
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!cloudId) {
       resolve({ success: false, message: "no cloud Id provided" });
     } else {

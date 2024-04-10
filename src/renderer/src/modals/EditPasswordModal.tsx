@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import ErrorModal from './ErrorModal'
+import { AuthContext } from '@renderer/utils/AuthContext'
 
 interface Password {
   id: number
@@ -20,6 +21,7 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
   const [password, setPassword] = useState(userPassword.password)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [message, setMessage] = useState("")
+  const {user} = useContext(AuthContext)
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>):void => {
     e.preventDefault()
@@ -37,6 +39,7 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
       return
     }else{
       const passwordObject = {
+        user_id: user?.id,
         id:userPassword.id,
         service:service,
         username: username,

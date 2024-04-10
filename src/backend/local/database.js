@@ -208,83 +208,115 @@ function updateCloudId(userId, cloudId){
 // PASSWORD RELATED OPERATIONS
 
 
-function getPasswordsByUser(userId){
-  const user = userId
-  return new Promise((resolve, reject)=>{
-    const fetchQuery = `SELECT * FROM passwords WHERE user_id = ?`
-    db.all(fetchQuery, user, (err, rows)=>{
-      if(err){
-        reject(err)
-      }else{
-       if(rows){
-        resolve({success:true, passwords:rows})
-       }else{
-        reject(new Error("Fetch Error"))
-       }
-      }
-    })
-  })
-}
-
-function updatePasswordById(password){
-  const pId = password.id
-  const userName = password.username
-  const service = password.service
-  const passwordData = password.password
-  let timestamp = new Date()
-  timestamp = timestamp.toISOString
-  return new Promise((resolve, reject)=>{
-    if(!pId){
-      reject(new Error("No Id provided"))
-    }else{
-      const query = `
-        UPDATE passwords
-        SET service = ?,
-            user_name = ?,
-            password = ?,
-            updated_at = ?
-          WHERE id = ?
-        `
-        db.run(query, [service, userName, passwordData, timestamp, pId],
-        function(err){
-          if(err){
-            reject(err)
-          }else{
-            resolve({success:true, message:"password updated successfully"})
-          }
-        })
-    }
-  })
-}
-
- function createPasswordByUserId(password) {
-  const userId = password.id
-  const service = password.service
-  const userName = password.username
-  const passwordData = password.password
-  let timestamp = new Date()
-  timestamp = timestamp.toISOString()
-  console.log(userId, service, passwordData, timestamp)
-
+function getPasswordsByUser(userId) {
+  const user = userId;
   return new Promise((resolve, reject) => {
-    if(!userId || !passwordData){
-      reject(new Error("Incomplete Data"))
-    }else{
-      const query = `
-      INSERT INTO passwords (user_id, service, user_name, password, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-      `
-      db.run(query, [userId, service, userName, passwordData, timestamp, timestamp],
-        function(err){
-          if(err){
-            reject(err)
-          }else{
-            resolve({success:true, message:"password created successfully"})
-          }
+    const fetchQuery = `SELECT * FROM users WHERE id = ?`;
+    db.get(fetchQuery, user, (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (row) {
+          const hashedMasterKey = row.master_key;
+          const passwordQuery = `SELECT * FROM passwords WHERE user_id = ?`;
+          db.all(passwordQuery, user, (err, rows) => {
+            if (err) {
+              reject(err);
+            } else {
+              if (rows) {
+                const decryptedPasswords = rows.map((password) => ({
+                  ...password,
+                  password: decrypt(password.password, hashedMasterKey),
+                }));
+                resolve({ success: true, passwords: decryptedPasswords });
+              } else {
+                reject(new Error('Fetch Error'));
+              }
+            }
+          });
+        } else {
+          reject(new Error('User not found'));
         }
-      )
-    }
-  })
+      }
+    });
+  });
+}
+
+
+function updatePasswordById(password) {
+  const pId = password.id;
+  const userId = password.user_id;
+  const userName = password.username;
+  const service = password.service;
+  let timestamp = new Date();
+  timestamp = timestamp.toISOString;
+  console.log(password)
+  return new Promise((resolve, reject) => {
+    const fetchQuery = `SELECT * FROM users WHERE id = ?`;
+    db.get(fetchQuery, userId, (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        if (row) {
+          const hashedMasterKey = row.master_key;
+          const passwordData = encrypt(password.password, hashedMasterKey);
+          const updateQuery = `
+            UPDATE passwords
+            SET service = ?,
+                user_name = ?,
+                password = ?,
+                updated_at = ?
+            WHERE id = ?
+          `;
+          db.run(updateQuery, [service, userName, passwordData, timestamp, pId], function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve({ success: true, message: 'Password updated successfully' });
+            }
+          });
+        } else {
+          reject(new Error('User not found'));
+        }
+      }
+    });
+  });
+}
+
+function createPasswordByUserId(password) {
+  const userId = password.id;
+  const service = password.service;
+  const userName = password.username;
+  let timestamp = new Date();
+  timestamp = timestamp.toISOString();
+  return new Promise((resolve, reject) => {
+    const fetchQuery = `SELECT * FROM users WHERE id = ?`;
+    db.get(fetchQuery, userId, (err, row) => {
+      
+      if (err) {
+        reject(err);
+      } else {
+        if (row) {
+          const hashedMasterKey = row.master_key;
+          console.log(hashedMasterKey)
+          const passwordData = encrypt(password.password, hashedMasterKey);
+          const createQuery = `
+            INSERT INTO passwords (user_id, service, user_name, password, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `;
+          db.run(createQuery, [userId, service, userName, passwordData, timestamp, timestamp], function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve({ success: true, message: 'Password created successfully' });
+            }
+          });
+        } else {
+          reject(new Error('User not found'));
+        }
+      }
+    });
+  });
 }
 
 
