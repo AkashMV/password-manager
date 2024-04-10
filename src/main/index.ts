@@ -6,9 +6,13 @@ import {
   addUser, 
   verifyUser, 
   getPasswordsByUser,
+  updateCloudStatus,
   updatePasswordById,
-  createPasswordByUserId
+  createPasswordByUserId,
+  updateCloudId,
 } from '../backend/local/database'
+
+import {createUser, connectToDatabase} from "../backend/cloud/index"
 import generatePassword from "../backend/utils/passwordGenerator"
 
 function createWindow(): void {
@@ -21,7 +25,9 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      webSecurity:false,
+      devTools:true
     }
   })
 
@@ -123,7 +129,18 @@ ipcMain.handle('verify-user', (event, args) => {
     verifyUser(userName, masterKey)
       .then((response)=>{
         if(response.success){
-          resolve({success:true, message: "user authentication success", user: {id: response.user.id, username: response.user.username}})
+          resolve(
+            {
+              success:true,
+              message: "user authentication success", 
+              user: 
+                {
+                  id: response.user.id, 
+                  username: response.user.username, 
+                  cloudId: response.user.cloud_id, 
+                  cloud_enabled: response.user.cloud_enabled
+                }
+              })
         }else{
           resolve({success:false, message:response.message})
         }
@@ -190,3 +207,103 @@ ipcMain.handle('update-password', (event, args)=>{
     }
   })
 })
+
+ipcMain.handle('create-cloud-user', (event, args)=>{
+  const {userId, userName} = args
+  console.log(userId)
+  return new Promise((resolve)=>{
+    if(!userId){
+      resolve({success:false, message:"User Not Logged In"})
+    }else{
+      createUser(userName)
+      .then((response)=>{
+        console.log(response)
+        if(!response.success){
+          resolve({success:false, message:"Internal server error"})
+        }else{
+          updateCloudId(userId, response.cloudId)
+            .then((response)=>{
+              console.log(response)
+              resolve({success:true, cloudId: response.cloudId, message: "cloud user created"})
+            })
+            .catch((error)=>{
+              console.log(error)
+            })
+        }
+      })
+      .catch((error)=>{
+        resolve({success:false, message: "Internal Server Error",  error: error})
+      })
+    }
+  })
+})
+
+ipcMain.handle('update-cloud-integration', (event, args) => {
+  const { userId, cloudEnabled } = args;
+  console.log(userId, cloudEnabled);
+
+  return new Promise((resolve, reject) => {
+    if (!userId) {
+      resolve({ success: false, message: "User Not Logged In" });
+    } else {
+      if (cloudEnabled) {
+        connectToDatabase()
+          .then((connection) => {
+            console.log(connection);
+            if (connection.success) {
+              console.log(cloudEnabled);
+              updateCloudStatus(userId, cloudEnabled)
+                .then((message) => {
+                  resolve({ success: true, message: message });
+                })
+                .catch((error) => {
+                  console.log("Cloud Status Updation Error", error);
+                  resolve({ success: false, message: "Internal Server Error" });
+                });
+            } else {
+              resolve({ success: false, message: "Cloud Connection failed" });
+            }
+          })
+          .catch((error) => {
+            console.log("Error connecting to MongoDB Atlas", error);
+            resolve({ success: false, message: "Cloud Connection failed" });
+          });
+      } else {
+        updateCloudStatus(userId, cloudEnabled)
+          .then((message) => {
+            resolve({ success: true, message: message });
+          })
+          .catch((error) => {
+            console.log("Cloud Status Updation Error", error);
+            resolve({ success: false, message: "Internal Server Error" });
+          });
+      }
+    }
+  });
+});
+
+
+
+ipcMain.handle("login-cloud", (event, args) => {
+  const { cloudId } = args;
+
+  return new Promise((resolve, reject) => {
+    if (!cloudId) {
+      resolve({ success: false, message: "no cloud Id provided" });
+    } else {
+      connectToDatabase()
+        .then((connection) => {
+          console.log(connection);
+          if (connection.success) {
+            resolve({ success: true, message: "cloud database connected" });
+          } else {
+            resolve({ success: false, message: "cloud database connection failed" });
+          }
+        })
+        .catch((error) => {
+          console.log("Error connecting to MongoDB Atlas", error);
+          resolve({ success: false, message: "cloud database connection failed" });
+        });
+    }
+  });
+});

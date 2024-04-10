@@ -3,6 +3,8 @@ import React, {createContext, useState} from "react";
 interface User{
     id: string
     username: string
+    cloudId: string | null
+    cloudEnabled: boolean
 }
 
 interface AuthContextProps{

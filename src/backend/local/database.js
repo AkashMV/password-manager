@@ -27,6 +27,8 @@ function initializeDatabase() {
         username TEXT NOT NULL UNIQUE,
         master_key TEXT NOT NULL,
         salt TEXT NOT NULL,
+        cloud_id TEXT,
+        cloud_enabled BOOLEAN,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )`
@@ -37,8 +39,10 @@ function initializeDatabase() {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         service TEXT NOT NULL,
-        user_name TEXT NOT NULL,
+        user_name TEXT,
         password TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id)
       )`
     )
@@ -71,12 +75,12 @@ async function addUser(userName, masterKey) {
           resolve({success:false, message:"username already exists"})
         }else{
           const query = `
-          INSERT INTO users (username, master_key, salt, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO users (username, master_key, salt, cloud_id, cloud_enabled, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
           `
           db.run(
             query,
-            [userName, hashedMasterKey, salt, timestamp, timestamp],
+            [userName, hashedMasterKey, salt, null, false, timestamp, timestamp],
             function (err) {
               if (err) {
                 reject(err)
@@ -142,7 +146,63 @@ function verifyUser(user, masterKey){
     })
   })
   
+}
 
+
+
+function updateCloudStatus(userId, cloudStatus){
+  const user = userId
+  const newCloudStatus = cloudStatus
+  let timestamp = new Date()
+  timestamp = timestamp.toISOString
+  return new Promise((resolve, reject)=>{
+    if(!user){
+      reject(new Error("No User Idprovided"))
+    }else{
+      const query = `
+        UPDATE users
+        SET cloud_enabled = ?,
+            updated_at = ?
+          WHERE id = ?
+        `
+        db.run(query, [newCloudStatus,  timestamp, user],
+        function(err){
+          if(err){
+            reject(err)
+          }else{
+            resolve({success:true, message:"password updated successfully"})
+          }
+        })
+    }
+  })
+}
+
+
+function updateCloudId(userId, cloudId){
+  let timestamp = new Date()
+  timestamp = timestamp.toISOString
+  return new Promise((resolve, reject)=>{
+    if(!cloudId){
+      reject(new Error("No cloud id provided"))
+    }else if(!userId){
+      reject(new Error("No user id provided"))
+    }else{
+      const query = `
+      UPDATE users
+      SET cloud_ID = ?,
+          updated_at = ?
+        WHERE id = ?
+      `
+      db.run(query, [cloudId,  timestamp, userId],
+      function(err){
+        if(err){
+          reject(err)
+        }else{
+          resolve({success:true, message:"cloud id updated successfully"})
+        }
+      })
+    }
+  })
 }
 
 // PASSWORD RELATED OPERATIONS
@@ -171,6 +231,8 @@ function updatePasswordById(password){
   const userName = password.username
   const service = password.service
   const passwordData = password.password
+  let timestamp = new Date()
+  timestamp = timestamp.toISOString
   return new Promise((resolve, reject)=>{
     if(!pId){
       reject(new Error("No Id provided"))
@@ -179,10 +241,11 @@ function updatePasswordById(password){
         UPDATE passwords
         SET service = ?,
             user_name = ?,
-            password = ?
+            password = ?,
+            updated_at = ?
           WHERE id = ?
         `
-        db.run(query, [service, userName, passwordData, pId],
+        db.run(query, [service, userName, passwordData, timestamp, pId],
         function(err){
           if(err){
             reject(err)
@@ -208,10 +271,10 @@ function updatePasswordById(password){
       reject(new Error("Incomplete Data"))
     }else{
       const query = `
-      INSERT INTO passwords (user_id, service, user_name, password)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO passwords (user_id, service, user_name, password, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
       `
-      db.run(query, [userId, service, userName, passwordData],
+      db.run(query, [userId, service, userName, passwordData, timestamp, timestamp],
         function(err){
           if(err){
             reject(err)
@@ -228,8 +291,10 @@ function updatePasswordById(password){
 export { 
   addUser, 
   getAllUsers, 
-  verifyUser, 
+  verifyUser,
+  updateCloudStatus,
   getPasswordsByUser, 
   updatePasswordById,
   createPasswordByUserId,
+  updateCloudId,
 }

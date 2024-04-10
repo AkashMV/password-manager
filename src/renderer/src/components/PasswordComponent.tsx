@@ -29,7 +29,7 @@ const PasswordComponent = ({ password, refreshPasswords }: PasswordComponentProp
 
   const closeSuccessModal = ():void => {
     setShowSuccessModal(false)
-    refreshPasswords()
+    
   }
 
 
@@ -39,6 +39,7 @@ const PasswordComponent = ({ password, refreshPasswords }: PasswordComponentProp
     setShowEditPasswordModal(false)
     setMessage("Password Details Updated Successfully")
     setShowSuccessModal(true)
+    refreshPasswords()
   }
 
 
@@ -115,7 +116,7 @@ const PasswordComponent = ({ password, refreshPasswords }: PasswordComponentProp
       </div>
       <div className="absolute top-2 right-2">
         <FiEye
-          className="text-white cursor-pointer"
+          className="text-white cursor-pointer bg-fuschia-500"
           onClick={handleViewClick}
         />
       </div>

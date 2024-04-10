@@ -29,46 +29,82 @@ console.log(user)
 
   // Handle form submission with TypeScript type for the event
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault() // Correctly prevent the default form submission
-    
-    let validationErrors = 2
-    if(userName.length < 1){
-      setMessage("Username must not be blank")
-      setShowErrorModal(true)
-    }else{
-      validationErrors--
+    e.preventDefault(); // Correctly prevent the default form submission
+  
+    let validationErrors = 2;
+    if (userName.length < 1) {
+      setMessage("Username must not be blank");
+      setShowErrorModal(true);
+    } else {
+      validationErrors--;
     }
-    if(masterKey.length < 1){
-      setMessage("Master Key must not be blank")
-      setShowErrorModal(true)
-    }else{
-      validationErrors--
+    if (masterKey.length < 1) {
+      setMessage("Master Key must not be blank");
+      setShowErrorModal(true);
+    } else {
+      validationErrors--;
     }
-    
+  
     // Send login data to the Electron backend if there are no errors
-      if(validationErrors == 0){
-        window.electron.ipcRenderer
-          .invoke('verify-user', { userName, masterKey })
-            .then((response) => {
-              if (response.success) {
-                const userData = {
-                  id: response.user.id,
-                  username: response.user.username
-                }
-                setUser(userData)
-                navigate("/dashboard")
-              } else {
-                setMessage(response.message)
-                setShowErrorModal(true)
-              }
-            })
-            .catch((error) => {
-              console.log('Error sending Login request', error)
-              setMessage("An error occured while log in")
-              setShowErrorModal(true)
-            })
-        }
+    if (validationErrors === 0) {
+      window.electron.ipcRenderer
+        .invoke('verify-user', { userName, masterKey })
+        .then((response) => {
+          if (response.success) {
+            const userData = {
+              id: response.user.id,
+              username: response.user.username,
+              cloudId: response.user.cloudId,
+              cloudEnabled: response.user.cloud_enabled
+            };
+            if (userData.cloudEnabled) {
+              window.electron.ipcRenderer.invoke("login-cloud", { cloudId: userData.cloudId })
+                .then((response) => {
+                  if (response.success) {
+                    console.log(response.message);
+                    setUser(userData);
+                    console.log(userData);
+                    navigate("/dashboard");
+                  } else {
+                    console.log(response.message);
+                    userData.cloudEnabled = false;
+                    window.electron.ipcRenderer.invoke("update-cloud-integration", { userId: userData.id, cloudEnabled: userData.cloudEnabled })
+                      .then((response) => {
+                        console.log(response);
+                        setUser(userData);
+                        console.log(userData);
+                        navigate("/dashboard");
+                      })
+                      .catch((error) => {
+                        console.log('Error updating cloud integration', error);
+                        setMessage("An error occurred while updating cloud integration");
+                        setShowErrorModal(true);
+                      });
+                  }
+                })
+                .catch((error) => {
+                  console.log('Error logging into cloud', error);
+                  setMessage("An error occurred while logging into cloud");
+                  setShowErrorModal(true);
+                });
+            } else {
+              setUser(userData);
+              console.log(userData);
+              navigate("/dashboard");
+            }
+          } else {
+            setMessage(response.message);
+            setShowErrorModal(true);
+          }
+        })
+        .catch((error) => {
+          console.log('Error sending Login request', error);
+          setMessage("An error occurred while logging in");
+          setShowErrorModal(true);
+        });
     }
+  };
+  
 
     const closeModal = (): void => {
       setShowErrorModal(false)
