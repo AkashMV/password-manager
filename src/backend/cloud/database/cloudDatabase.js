@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const URI = 'mongodb+srv://sahasrasva01:qbbbv7KuVcDbjZCk@cluster0.9esfqmk.mongodb.net/password-manager?retryWrites=true&w=majority';
+const URI = `${process.env.MONGODB_URI}/${process.env.MONGODB_DB_NAME}?retryWrites=true&w=majority`;
 
 function connectToDatabase() {
   return new Promise((resolve, reject) => {

@@ -11,9 +11,10 @@ import {
   createPasswordByUserId,
   updateCloudId,
 } from '../backend/local/database'
-
+import * as dotenv from 'dotenv';
 import {createUser, connectToDatabase} from "../backend/cloud/index"
 import generatePassword from "../backend/utils/passwordGenerator"
+dotenv.config();
 
 function createWindow(): void {
   // Create the browser window.
