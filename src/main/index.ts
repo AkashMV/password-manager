@@ -11,7 +11,7 @@ import {
   createPasswordByUserId,
   updateCloudId,
 } from '../backend/local/database'
-import {createUser, connectToDatabase, getCloudPasswords, createCloudPasswordByUserId} from "../backend/cloud/index"
+import {createUser, connectToDatabase, getCloudPasswords, createCloudPasswordByUserId, editCloudPasswordById} from "../backend/cloud/index"
 import generatePassword from "../backend/utils/passwordGenerator"
 import mongoose from 'mongoose'
 
@@ -319,12 +319,14 @@ ipcMain.handle('fetch-cloud-passwords', (event, args)=>{
   return new Promise((resolve)=>{
     getCloudPasswords(userId)
       .then((passwords)=>{
+        
         const formattedPasswords = passwords.map((password) => ({
-          id: password._id,
+          id: password._id.toString(),
           service: password.service,
           user_name: password.username,
           password: password.password,
         }));
+        console.log(formattedPasswords)
         resolve({success:true, message:"Passwords fetched successfully", passwords: formattedPasswords})
       })
       .catch((err)=>{
@@ -361,7 +363,7 @@ ipcMain.handle('update-cloud-password', (event, args)=>{
     if(!password){
       resolve({success:false, message:"Password details not provided"})
     }else{
-      updatePasswordById(password)
+      editCloudPasswordById(password)
         .then((message)=>{
           resolve({success:true, message:message}) 
         })

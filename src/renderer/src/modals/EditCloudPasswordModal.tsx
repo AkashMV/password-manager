@@ -39,7 +39,7 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
       return
     }else{
       const passwordObject = {
-        user_id: user?.id,
+        user_id: user?.cloudId,
         id:userPassword.id,
         service:service,
         username: username,

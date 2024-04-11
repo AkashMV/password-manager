@@ -24,6 +24,28 @@ async function createCloudPasswordByUserId(passwordObject) {
     }
   }
   
+  async function editCloudPasswordById(passwordObject) {
+    try {
+      const userId = passwordObject.user_id;
+      const service = passwordObject.service;
+      const userName = passwordObject.username;
+      const password = passwordObject.password;
+      const updatedPassword = {
+        userId: new mongoose.Types.ObjectId(userId),
+        service: service,
+        username: userName,
+        password: password,
+      };
+      console.log(updatedPassword);
+      await Password.findByIdAndUpdate(new mongoose.Types.ObjectId(passwordObject.id), updatedPassword);
+      console.log('Password updated in the cloud database');
+    } catch (error) {
+      console.error('Error updating password in the cloud database:', error);
+      throw error;
+    }
+  }
+  
+
   async function getCloudPasswords(cloudId) {
 
     try {
@@ -35,4 +57,4 @@ async function createCloudPasswordByUserId(passwordObject) {
     }
   }
 
-export {getCloudPasswords, createCloudPasswordByUserId}
+export {getCloudPasswords, createCloudPasswordByUserId, editCloudPasswordById}
