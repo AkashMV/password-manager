@@ -13,65 +13,77 @@ interface PasswordModalProps {
   userPassword: Password
   onClose: () => void
   onUpdateSuccess: () => void
+  onDeleteSuccess: () => void
 }
 
-const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordModalProps): JSX.Element => {
+const EditCloudPasswordModal = ({ userPassword, onClose, onUpdateSuccess, onDeleteSuccess }: PasswordModalProps): JSX.Element => {
   const [service, setService] = useState(userPassword.service)
   const [username, setUsername] = useState(userPassword.user_name)
   const [password, setPassword] = useState(userPassword.password)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [message, setMessage] = useState("")
-  const {user} = useContext(AuthContext)
+  const { user } = useContext(AuthContext)
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>):void => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
-    if(password.length < 1){
+    if (password.length < 1) {
       setMessage("Password must not be empty")
       setShowErrorModal(true)
       return
-    }else if(service.length < 1){
+    } else if (service.length < 1) {
       setMessage("Service must not be empty")
       setShowErrorModal(true)
       return
-    }else if(username.length < 1){
+    } else if (username.length < 1) {
       setMessage("username must not be empty")
       setShowErrorModal(true)
       return
-    }else{
+    } else {
       const passwordObject = {
         user_id: user?.cloudId,
-        id:userPassword.id,
-        service:service,
+        id: userPassword.id,
+        service: service,
         username: username,
         password: password
       }
-      window.electron.ipcRenderer.invoke("update-cloud-password", {passwordObject})
-        .then((response)=>{
-          if(response.success){
+      window.electron.ipcRenderer.invoke("update-cloud-password", { passwordObject })
+        .then((response) => {
+          if (response.success) {
             onUpdateSuccess()
-          }else{
+          } else {
             setMessage(response.message)
             setShowErrorModal(true)
           }
         })
     }
   }
-  
 
-  const closeErrorModal = ():void =>{
+  const handleDelete = (): void => {
+    window.electron.ipcRenderer.invoke("delete-cloud-password", { passwordId: userPassword.id })
+      .then((response) => {
+        if (response.success) {
+          onDeleteSuccess()
+        } else {
+          setMessage(response.message)
+          setShowErrorModal(true)
+        }
+      })
+  }
+
+  const closeErrorModal = (): void => {
     setShowErrorModal(false)
   }
 
-  const generatePassword = ():void =>{
+  const generatePassword = (): void => {
     window.electron.ipcRenderer.invoke('generate-password')
-    .then((response)=>{
-      setPassword(response)
-    })
-    .catch((err)=>{
-      console.log("Error", err)
-      setMessage("Error Generating Password")
-      setShowErrorModal(true)
-    })
+      .then((response) => {
+        setPassword(response)
+      })
+      .catch((err) => {
+        console.log("Error", err)
+        setMessage("Error Generating Password")
+        setShowErrorModal(true)
+      })
   }
 
   return (
@@ -131,6 +143,13 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
           <div className="flex justify-end">
             <button
               type="button"
+              onClick={handleDelete}
+              className="px-4 py-2 mr-2 bg-red-500 hover:bg-red-600 text-white rounded"
+            >
+              Delete
+            </button>
+            <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 mr-2 bg-gray-300 text-gray-700 rounded"
             >
@@ -147,4 +166,4 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
   )
 }
 
-export default EditPasswordModal
+export default EditCloudPasswordModal

@@ -42,6 +42,13 @@ const PasswordComponent = ({ password, refreshPasswords }: PasswordComponentProp
     refreshPasswords()
   }
 
+  console.log("AAAAAAAA", showSuccessModal)
+  const handleDeleteSuccess = ():void =>{
+    setShowEditPasswordModal(false)
+    setMessage("Password Deleted Successfully")
+    setShowSuccessModal(true)
+    refreshPasswords()
+  }
 
   const closePasswordModal = (): void => {
     setShowEditPasswordModal(false);
@@ -139,6 +146,7 @@ const PasswordComponent = ({ password, refreshPasswords }: PasswordComponentProp
           onClose={closePasswordModal}
           userPassword={password}
           onUpdateSuccess={handleUpdateSuccess}
+          onDeleteSuccess={handleDeleteSuccess}
         />
       )}
       {showErrorModal && (

@@ -44,6 +44,17 @@ async function createCloudPasswordByUserId(passwordObject) {
       throw error;
     }
   }
+
+  async function deleteCloudPasswordById(passwordId) {
+    try {
+
+      await Password.findByIdAndDelete(new mongoose.Types.ObjectId(passwordId))
+      console.log('Password deleted in the cloud database')
+    } catch (error) {
+      console.error('Error updating password in the cloud database:', error);
+      throw error;
+    }
+  }
   
 
   async function getCloudPasswords(cloudId) {
@@ -57,4 +68,4 @@ async function createCloudPasswordByUserId(passwordObject) {
     }
   }
 
-export {getCloudPasswords, createCloudPasswordByUserId, editCloudPasswordById}
+export {getCloudPasswords, createCloudPasswordByUserId, editCloudPasswordById, deleteCloudPasswordById}

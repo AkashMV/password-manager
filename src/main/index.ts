@@ -10,10 +10,19 @@ import {
   updatePasswordById,
   createPasswordByUserId,
   updateCloudId,
+  deletePasswordById
 } from '../backend/local/database'
-import {createUser, connectToDatabase, getCloudPasswords, createCloudPasswordByUserId, editCloudPasswordById} from "../backend/cloud/index"
+import {
+  createUser, 
+  connectToDatabase, 
+  getCloudPasswords, 
+  createCloudPasswordByUserId, 
+  editCloudPasswordById,
+  deleteCloudPasswordById
+} from "../backend/cloud/index"
 import generatePassword from "../backend/utils/passwordGenerator"
 import mongoose from 'mongoose'
+import { error } from 'console'
 
 
 function createWindow(): void {
@@ -208,6 +217,22 @@ ipcMain.handle('update-password', (event, args)=>{
   })
 })
 
+ipcMain.handle("delete-password", (event, args)=>{
+  const {passwordId} = args
+  return new Promise((resolve)=>{
+    if(!passwordId){
+      resolve({success:false, message: "Password id not provided"})
+    }else{
+      deletePasswordById(passwordId)
+        .then((response)=>{
+            resolve({success:true, message: "Password deleted successfully"})
+        })
+        .catch((error)=>{
+          resolve({success:false, message: "Internal Server Error, Password deletion failed"})
+        })
+    }
+  })
+})
 
 
 // CLOUD RELATED CALLS
@@ -370,6 +395,24 @@ ipcMain.handle('update-cloud-password', (event, args)=>{
         .catch((error)=>{
           console.log("Password Update Error", error)
           resolve({success:false, message:"Internal Server Error"})
+        })
+    }
+  })
+})
+
+
+ipcMain.handle("delete-cloud-password", (event, args)=>{
+  const {passwordId} = args
+  return new Promise((resolve)=>{
+    if(!passwordId){
+      resolve({success:false, message: "Password id not provided"})
+    }else{
+      deleteCloudPasswordById(passwordId)
+        .then((response)=>{
+            resolve({success:true, message: "Password deleted successfully"})
+        })
+        .catch((error)=>{
+          resolve({success:false, message: "Internal Server Error, Password deletion failed"})
         })
     }
   })

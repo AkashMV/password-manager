@@ -1,5 +1,5 @@
 import { connectToDatabase } from "./database/cloudDatabase"
-import { createCloudPasswordByUserId, getCloudPasswords, editCloudPasswordById } from "./services/cloudPasswordService"
+import { createCloudPasswordByUserId, getCloudPasswords, editCloudPasswordById, deleteCloudPasswordById } from "./services/cloudPasswordService"
 import { createUser } from "./services/cloudUserService"
 
 export {
@@ -7,5 +7,6 @@ export {
     createCloudPasswordByUserId, 
     getCloudPasswords,
     createUser,
-    editCloudPasswordById
+    editCloudPasswordById,
+    deleteCloudPasswordById
 }

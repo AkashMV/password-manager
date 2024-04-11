@@ -13,9 +13,10 @@ interface PasswordModalProps {
   userPassword: Password
   onClose: () => void
   onUpdateSuccess: () => void
+  onDeleteSuccess: () => void
 }
 
-const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordModalProps): JSX.Element => {
+const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess, onDeleteSuccess }: PasswordModalProps): JSX.Element => {
   const [service, setService] = useState(userPassword.service)
   const [username, setUsername] = useState(userPassword.user_name)
   const [password, setPassword] = useState(userPassword.password)
@@ -57,6 +58,18 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
     }
   }
   
+  const handleDelete = (): void => {
+    window.electron.ipcRenderer.invoke("delete-password", { passwordId: userPassword.id })
+      .then((response) => {
+        if (response.success) {
+          onDeleteSuccess()
+        } else {
+          setMessage(response.message)
+          setShowErrorModal(true)
+        }
+      })
+  }
+
 
   const closeErrorModal = ():void =>{
     setShowErrorModal(false)
@@ -129,6 +142,13 @@ const EditPasswordModal = ({ userPassword, onClose, onUpdateSuccess }: PasswordM
             </div>
           </div>
           <div className="flex justify-end">
+            <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 mr-2 bg-red-500 hover:bg-red-600 text-white rounded"
+              >
+                Delete
+            </button>
             <button
               type="button"
               onClick={onClose}

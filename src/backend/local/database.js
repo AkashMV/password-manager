@@ -285,6 +285,27 @@ function updatePasswordById(password) {
   });
 }
 
+function deletePasswordById(passwordId) {
+  return new Promise((resolve, reject) => {
+    const deleteQuery = `
+      DELETE FROM passwords
+      WHERE id = ?
+    `;
+    db.run(deleteQuery, [passwordId], function (err) {
+      if (err) {
+        reject(err);
+      } else {
+        if (this.changes > 0) {
+          resolve({ success: true, message: 'Password deleted successfully' });
+        } else {
+          resolve({ success: false, message: 'Password not found' });
+        }
+      }
+    });
+  });
+}
+
+
 function createPasswordByUserId(password) {
   const userId = password.id;
   const service = password.service;
@@ -331,4 +352,5 @@ export {
   updatePasswordById,
   createPasswordByUserId,
   updateCloudId,
+  deletePasswordById
 }

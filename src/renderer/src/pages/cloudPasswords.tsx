@@ -66,7 +66,7 @@ const CloudStorage = (): JSX.Element => {
             <FiArrowLeft className="mr-2" />
             Back
           </button>
-          <h1 className="text-2xl font-bold">Your Local Passwords</h1>
+          <h1 className="text-2xl font-bold">Your Cloud Passwords</h1>
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">
