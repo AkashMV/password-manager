@@ -102,7 +102,7 @@ const RegisterPage = (): JSX.Element => {
   return (
     <div className="flex items-center justify-center h-screen bg-zinc-950">
       <div className="p-10 bg-zinc-900 rounded-lg shadow-xl w-96">
-        <div className="flex justify-center mb-6 text-5xl font-bold text-slate-400">👁️Spy</div>
+        <div className="flex justify-center mb-6 text-5xl font-bold text-yellow-300">CipherVault</div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-white text-sm font-bold mb-2">
