@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const URI = `${process.env.MONGODB_URI}/${process.env.MONGODB_DB_NAME}?retryWrites=true&w=majority`;
 

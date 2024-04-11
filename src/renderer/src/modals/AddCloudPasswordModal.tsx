@@ -10,7 +10,7 @@ interface AddCloudPasswordModalProps {
 
 const AddCloudPasswordModal = ({ onClose, refreshPasswords }: AddCloudPasswordModalProps): JSX.Element => {
   const { user } = useContext(AuthContext);
-  const userId = user?.id;
+  const userId = user?.cloudId;
   const [service, setService] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -45,6 +45,7 @@ const AddCloudPasswordModal = ({ onClose, refreshPasswords }: AddCloudPasswordMo
         username,
         password,
       };
+      console.log(passwordData)
       window.electron.ipcRenderer.invoke('create-cloud-password', { passwordData })
         .then((response) => {
           if (response.success) {

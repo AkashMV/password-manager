@@ -1,14 +1,10 @@
 import { User } from "../model/User";
 
-async function createUser(userName) {
+async function createUser() {
   try {
-    if (!userName) {
-      throw new Error("No userName provided");
-    }
-    const newUser = new User({
-      username: userName,
-    });
+    const newUser = new User();
     const savedUser = await newUser.save();
+    console.log(savedUser._id)
     return { success: true, message: "User created successfully", cloudId: savedUser._id };
   } catch (error) {
     return { success: false, message: "Error creating user", error: error.message };

@@ -33,6 +33,7 @@ const CloudStorage = (): JSX.Element => {
     window.electron.ipcRenderer.invoke('fetch-cloud-passwords', { userId })
       .then((response) => {
         if (response.success) {
+          console.log(response.passwords)
           setPasswords(response.passwords);
         } else {
           setMessage(response.message);

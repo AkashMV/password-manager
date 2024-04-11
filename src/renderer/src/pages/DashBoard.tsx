@@ -1,5 +1,5 @@
 // DashBoard.tsx
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FiLogOut } from 'react-icons/fi'
 import { AuthContext } from '@renderer/utils/AuthContext'
@@ -7,15 +7,20 @@ import { useTheme } from '@renderer/utils/ThemeContext'
 
 const DashBoard = (): JSX.Element => {
   const navigate = useNavigate()
-  const {user, setUser} = useContext(AuthContext)
-  const {theme} = useTheme()
+  const { user, setUser } = useContext(AuthContext)
+  const { theme } = useTheme()
+  const [isCloudEnabled, setIsCloudEnabled] = useState(false)
+
+  useEffect(() => {
+    // Update the isCloudEnabled state based on the user's cloudEnabled value
+    setIsCloudEnabled(user?.cloudEnabled || false)
+  }, [user?.cloudEnabled])
 
   console.log(user)
-  const handleLogout = ():void => {
+  const handleLogout = (): void => {
     // Perform any necessary logout actions (e.g., clearing user session)
     setUser(null)
     navigate('/')
-
   }
 
   return (
@@ -44,16 +49,18 @@ const DashBoard = (): JSX.Element => {
               View Local Passwords
             </Link>
           </section>
-          <section className={`${theme === 'dark' ? 'bg-zinc-800' : 'bg-zinc-200'} p-6 rounded-lg shadow-md`}>
-            <h2 className="text-xl font-bold mb-4">View Cloud Passwords</h2>
-            <p className="mb-4">Access and manage your passwords stored in the cloud.</p>
-            <Link
-              to="/cloud-passwords"
-              className="inline-block bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded"
-            >
-              View Cloud Passwords
-            </Link>
-          </section>
+          {isCloudEnabled && user?.cloudId && (
+            <section className={`${theme === 'dark' ? 'bg-zinc-800' : 'bg-zinc-200'} p-6 rounded-lg shadow-md`}>
+              <h2 className="text-xl font-bold mb-4">View Cloud Passwords</h2>
+              <p className="mb-4">Access and manage your passwords stored in the cloud.</p>
+              <Link
+                to="/cloud-passwords"
+                className="inline-block bg-lime-300 hover:bg-lime-500 text-black font-bold py-2 px-4 rounded"
+              >
+                View Cloud Passwords
+              </Link>
+            </section>
+          )}
           <section className={`${theme === 'dark' ? 'bg-zinc-800' : 'bg-zinc-200'} p-6 rounded-lg shadow-md`}>
             <h2 className="text-xl font-bold mb-4">Get Breach Report</h2>
             <p className="mb-4">Check if any of your accounts have been compromised in a data breach.</p>

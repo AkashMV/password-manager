@@ -11,10 +11,10 @@ import {
   createPasswordByUserId,
   updateCloudId,
 } from '../backend/local/database'
-import * as dotenv from 'dotenv';
-import {createUser, connectToDatabase} from "../backend/cloud/index"
+import {createUser, connectToDatabase, getCloudPasswords, createCloudPasswordByUserId} from "../backend/cloud/index"
 import generatePassword from "../backend/utils/passwordGenerator"
-dotenv.config();
+import mongoose from 'mongoose'
+
 
 function createWindow(): void {
   // Create the browser window.
@@ -208,6 +208,10 @@ ipcMain.handle('update-password', (event, args)=>{
   })
 })
 
+
+
+// CLOUD RELATED CALLS
+
 ipcMain.handle('create-cloud-user', (event, args)=>{
   const {userId, userName} = args
   console.log(userId)
@@ -307,3 +311,64 @@ ipcMain.handle("login-cloud", (event, args) => {
     }
   });
 });
+
+
+ipcMain.handle('fetch-cloud-passwords', (event, args)=>{
+  const {userId} = args
+  console.log(typeof userId)
+  return new Promise((resolve)=>{
+    getCloudPasswords(userId)
+      .then((passwords)=>{
+        const formattedPasswords = passwords.map((password) => ({
+          id: password._id,
+          service: password.service,
+          user_name: password.username,
+          password: password.password,
+        }));
+        resolve({success:true, message:"Passwords fetched successfully", passwords: formattedPasswords})
+      })
+      .catch((err)=>{
+        console.log("Password fetch error", err)
+        resolve({success:false, message:"Internal Server Error"})
+      })
+  })
+})
+
+ipcMain.handle('create-cloud-password', (event, args)=>{
+  const {passwordData} = args
+  console.log(passwordData)
+  passwordData.userId = new mongoose.Types.ObjectId(passwordData.userId)
+  return new Promise((resolve)=>{
+    if(!passwordData){
+      resolve({success:false, message:"Password details not provided"})
+    }else{
+      createCloudPasswordByUserId(passwordData)
+        .then((message)=>{
+          resolve({success:true, message:message}) 
+        })
+        .catch((error)=>{
+          console.log("Password Update Error", error)
+          resolve({success:false, message:"Internal Server Error"})
+        })
+    }
+  })
+})
+
+ipcMain.handle('update-cloud-password', (event, args)=>{
+  const {passwordObject} = args
+  const password = passwordObject
+  return new Promise((resolve)=>{
+    if(!password){
+      resolve({success:false, message:"Password details not provided"})
+    }else{
+      updatePasswordById(password)
+        .then((message)=>{
+          resolve({success:true, message:message}) 
+        })
+        .catch((error)=>{
+          console.log("Password Update Error", error)
+          resolve({success:false, message:"Internal Server Error"})
+        })
+    }
+  })
+})

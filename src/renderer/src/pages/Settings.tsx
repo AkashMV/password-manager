@@ -17,14 +17,6 @@ const Settings = (): JSX.Element => {
     setCloudIntegration(newCloudIntegration)
     console.log(newCloudIntegration)
     if(user){
-      window.electron.ipcRenderer.invoke("update-cloud-integration", {
-        userId: user.id,
-        cloudEnabled: newCloudIntegration
-      })
-        .catch((error)=>{
-          console.log(error)
-        })
-
       if(newCloudIntegration && !user.cloudId){
         window.electron.ipcRenderer.invoke("create-cloud-user", {userId:user.id, userName:user.username})
           .then((response)=>{
@@ -35,6 +27,18 @@ const Settings = (): JSX.Element => {
             console.log(error)
           })
       }
+      window.electron.ipcRenderer.invoke("update-cloud-integration", {
+        userId: user.id,
+        cloudEnabled: newCloudIntegration
+      })
+        .then((response)=>{
+          if(response.success){
+            user.cloudEnabled = newCloudIntegration
+          }
+        })
+        .catch((error)=>{
+          console.log(error)
+        })
     }
   };
 

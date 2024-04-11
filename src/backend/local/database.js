@@ -1,12 +1,13 @@
 import { encrypt, decrypt, deriveKey, verifyMasterKey } from '../utils/encryption'
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 const sqlite3 = require('sqlite3').verbose()
 const path = require('path')
 
 //initalize the database
 const dbPath = path.resolve(__dirname, 'localPasswords.db')
 const db = new sqlite3.Database(
-  'C:/Users/nadua/OneDrive/Desktop/temp/password-manager/src/backend/local/localPasswords.db',
+  process.env.LOCALDB_PATH,
   sqlite3.OPEN_READWRITE + sqlite3.OPEN_CREATE,
   (err) => {
     if (err) {
@@ -20,6 +21,7 @@ const db = new sqlite3.Database(
 
 // Table Creation
 function initializeDatabase() {
+  console.log(process.env.LOCALDB_PATH)
   db.serialize(() => {
     db.run(
       `CREATE TABLE IF NOT EXISTS users (
@@ -193,7 +195,7 @@ function updateCloudId(userId, cloudId){
           updated_at = ?
         WHERE id = ?
       `
-      db.run(query, [cloudId,  timestamp, userId],
+      db.run(query, [cloudId.toString(),  timestamp, userId],
       function(err){
         if(err){
           reject(err)
