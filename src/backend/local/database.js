@@ -343,6 +343,33 @@ function createPasswordByUserId(password) {
 }
 
 
+function deleteUserById(userId){
+  const user = userId
+
+  return new Promise((resolve, reject)=>{
+    const query = `
+      DELETE FROM passwords WHERE user_id = ?
+    `
+    db.run(query, user, (err)=>{
+      if(err){
+        reject({success:false, message: "user deletion failed"})
+      }else{
+        const userDeletionQuery = `
+          DELETE FROM users WHERE id = ?
+        `
+        db.run(userDeletionQuery, user, (err)=>{
+          if(err){
+            reject({success:false, message:"user deletion failed"})
+          }else{
+            resolve({success:true, message:"user deletion success"})
+          }
+        })
+      }
+    })
+  })
+}
+
+
 export { 
   addUser, 
   getAllUsers, 
@@ -352,5 +379,6 @@ export {
   updatePasswordById,
   createPasswordByUserId,
   updateCloudId,
-  deletePasswordById
+  deletePasswordById,
+  deleteUserById
 }

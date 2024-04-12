@@ -4,12 +4,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiCloud, FiMoon, FiLogOut, FiTrash2 } from 'react-icons/fi';
 import { useTheme } from '@renderer/utils/ThemeContext';
 import { AuthContext } from '@renderer/utils/AuthContext';
+import ErrorModal from '@renderer/modals/ErrorModal';
+import SuccessModal from '@renderer/modals/SuccessModal';
 
 const Settings = (): JSX.Element => {
   const navigate = useNavigate();
   const {user, setUser} = useContext(AuthContext)
   const [cloudIntegration, setCloudIntegration] = useState(user?.cloudEnabled || false);
   const { theme, toggleTheme } = useTheme();
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [message, setMessage] = useState('')
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
 
   const handleCloudIntegrationToggle = ():void => {
@@ -47,14 +52,33 @@ const Settings = (): JSX.Element => {
   };
 
   const handleLogout = ():void => {
-    // Perform logout logic here
+    setUser(null)
     navigate('/');
   };
 
   const handleDeleteUser = ():void => {
-    // Perform delete user logic here
-    navigate('/');
+    window.electron.ipcRenderer.invoke("delete-user", {userId:user?.id})
+      .then((response)=>{
+        setMessage(response.message)
+        if(response.success){
+          setShowSuccessModal(true)
+        }else{
+          setShowErrorModal(true)
+        }
+      })
   };
+
+  const closeSuccessModal = ():void=>{
+    setUser(null)
+    navigate("/")
+    setShowSuccessModal(false)
+  }
+
+  const closeErrorModal = ():void => {
+    setShowErrorModal(false)
+  }
+
+
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-zinc-950' : 'bg-zinc-100'} ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
@@ -121,6 +145,8 @@ const Settings = (): JSX.Element => {
           </button>
         </div>
       </main>
+      {showErrorModal && (<ErrorModal errorMessage={message} onClose={closeErrorModal} />)}
+      {showSuccessModal && (<SuccessModal successMessage={message} onClose={closeSuccessModal} />)}
     </div>
   );
 };

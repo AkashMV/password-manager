@@ -10,7 +10,8 @@ import {
   updatePasswordById,
   createPasswordByUserId,
   updateCloudId,
-  deletePasswordById
+  deletePasswordById,
+  deleteUserById
 } from '../backend/local/database'
 import {
   createUser, 
@@ -229,6 +230,25 @@ ipcMain.handle("delete-password", (event, args)=>{
         })
         .catch((error)=>{
           resolve({success:false, message: "Internal Server Error, Password deletion failed"})
+        })
+    }
+  })
+})
+
+ipcMain.handle("delete-user", (event, args)=>{
+  const {userId} = args
+  return new Promise((resolve)=>{
+    if(!userId){
+      resolve({success:false, message: "User id not provided"})
+    }else{
+      deleteUserById(userId)
+        .then((response)=>{
+          console.log(response)
+            resolve({success:true, message: "User deleted successfully"})
+        })
+        .catch((error)=>{
+          console.log(error)
+          resolve({success:false, message: "Internal Server Error, User deletion failed"})
         })
     }
   })
