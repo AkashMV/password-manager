@@ -226,9 +226,11 @@ ipcMain.handle("delete-password", (event, args)=>{
     }else{
       deletePasswordById(passwordId)
         .then((response)=>{
+          console.log(response)
             resolve({success:true, message: "Password deleted successfully"})
         })
         .catch((error)=>{
+          console.log(error)
           resolve({success:false, message: "Internal Server Error, Password deletion failed"})
         })
     }

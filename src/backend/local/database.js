@@ -7,7 +7,7 @@ const path = require('path')
 //initalize the database
 const dbPath = path.resolve(__dirname, 'localPasswords.db')
 const db = new sqlite3.Database(
-  process.env.LOCALDB_PATH,
+  dbPath,
   sqlite3.OPEN_READWRITE + sqlite3.OPEN_CREATE,
   (err) => {
     if (err) {

@@ -27,8 +27,9 @@ const BreachReport = (): JSX.Element => {
 
     try {
       // Make an API call to check for breaches associated with the email
-      const response = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${email}`);
-
+      // const response = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${email}`);
+      const response = await fetch(`https://haveibeenpwned.com/api/v3/breach/facebook`);
+      console.log(response.json())
       if (response.ok) {
         const data: Breach[] = await response.json();
         setBreaches(data);
