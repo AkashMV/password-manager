@@ -25,11 +25,11 @@ const Settings = (): JSX.Element => {
       if(newCloudIntegration && !user.cloudId){
         window.electron.ipcRenderer.invoke("create-cloud-user", {userId:user.id, userName:user.username})
           .then((response)=>{
-            console.log(response)
+            console.log(response, "first time creation")
             const newCloudId = response.cloudId
             setUser({...user, cloudId:newCloudId})
           }).catch((error)=>{
-            console.log(error)
+            console.log("error occured:", error)
           })
       }
       window.electron.ipcRenderer.invoke("update-cloud-integration", {

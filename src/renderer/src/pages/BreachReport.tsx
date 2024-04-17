@@ -38,7 +38,7 @@ const BreachReport = (): JSX.Element => {
       }
     } catch (error) {
         console.log(error)
-      setError('An error occurred while fetching the breach report.');
+      setError('No breaches found for the given email.');
     }
 
     setIsLoading(false);

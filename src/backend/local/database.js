@@ -200,7 +200,7 @@ function updateCloudId(userId, cloudId){
         if(err){
           reject(err)
         }else{
-          resolve({success:true, message:"cloud id updated successfully"})
+          resolve({success:true, message:"cloud id updated successfully", cloudId: cloudId})
         }
       })
     }

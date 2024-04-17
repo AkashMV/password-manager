@@ -2,6 +2,8 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+
+
 import { 
   addUser, 
   verifyUser, 
@@ -13,6 +15,8 @@ import {
   deletePasswordById,
   deleteUserById
 } from '../backend/local/database'
+
+
 import {
   createUser, 
   connectToDatabase, 
@@ -21,9 +25,10 @@ import {
   editCloudPasswordById,
   deleteCloudPasswordById
 } from "../backend/cloud/index"
+
+
 import generatePassword from "../backend/utils/passwordGenerator"
 import mongoose from 'mongoose'
-import { error } from 'console'
 
 
 function createWindow(): void {
@@ -96,7 +101,6 @@ app.on('window-all-closed', () => {
 // code. You can also put them in separate files and require them here.
 
 // IPC handlers
-
 
 ipcMain.handle('register-account', (event, args) => {
   return new Promise((resolve) => {
